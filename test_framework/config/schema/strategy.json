@@ -1,0 +1,130 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "策略配置 Schema",
+  "description": "验证策略层、重试策略、报告输出等配置",
+  "type": "object",
+  "properties": {
+    "strategies": {
+      "type": "object",
+      "description": "测试策略配置",
+      "properties": {
+        "load": {
+          "type": "object",
+          "description": "负载策略配置",
+          "properties": {
+            "default_profile": {
+              "type": "string",
+              "description": "默认负载模型",
+              "enum": ["constant", "step", "spike", "soak", "ramp", "custom"]
+            },
+            "profiles": {
+              "type": "object",
+              "description": "各负载模型的详细参数"
+            }
+          }
+        },
+        "validation": {
+          "type": "object",
+          "description": "校验策略配置",
+          "properties": {
+            "default_validator": {
+              "type": "string",
+              "description": "默认校验器类型"
+            },
+            "strict_mode": {
+              "type": "boolean",
+              "description": "是否严格模式"
+            }
+          }
+        },
+        "retry": {
+          "type": "object",
+          "description": "重试策略配置",
+          "properties": {
+            "max_retries": {
+              "type": "integer",
+              "description": "最大重试次数",
+              "minimum": 0
+            },
+            "backoff_type": {
+              "type": "string",
+              "description": "退避策略类型",
+              "enum": ["none", "fixed", "exponential", "linear"]
+            },
+            "base_delay": {
+              "type": "number",
+              "description": "基础延迟时间（秒）",
+              "minimum": 0
+            },
+            "max_delay": {
+              "type": "number",
+              "description": "最大延迟时间（秒）",
+              "minimum": 0
+            }
+          }
+        }
+      }
+    },
+    "reporters": {
+      "type": "object",
+      "description": "报告输出配置",
+      "properties": {
+        "default_format": {
+          "type": "string",
+          "description": "默认报告格式",
+          "enum": ["html", "json", "console", "allure"]
+        },
+        "output_dir": {
+          "type": "string",
+          "description": "报告输出目录"
+        },
+        "auto_generate": {
+          "type": "boolean",
+          "description": "测试完成后是否自动生成报告"
+        },
+        "external": {
+          "type": "object",
+          "description": "外部报告平台集成",
+          "properties": {
+            "allure": {
+              "type": "object",
+              "properties": {
+                "enabled": { "type": "boolean" },
+                "output_dir": { "type": "string" }
+              }
+            },
+            "webhook": {
+              "type": "object",
+              "properties": {
+                "enabled": { "type": "boolean" },
+                "url": { "type": "string" },
+                "events": {
+                  "type": "array",
+                  "items": { "type": "string" }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "schedulers": {
+      "type": "object",
+      "description": "调度器配置",
+      "properties": {
+        "enabled": { "type": "boolean" },
+        "cron_jobs": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "name": { "type": "string" },
+              "cron": { "type": "string" },
+              "test_plan": { "type": "string" }
+            }
+          }
+        }
+      }
+    }
+  }
+}

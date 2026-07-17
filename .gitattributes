@@ -1,0 +1,58 @@
+# ============================================================
+# .gitattributes — 行尾符号与文件属性规范
+# ============================================================
+# 自动转换会触发 "LF will be replaced by CRLF" 警告，
+# 通过此文件显式控制每种文件类型的行尾格式。
+
+# ---------- 默认规则 ----------
+# 让 Git 自动处理未指定的文件类型
+* text=auto
+
+# ---------- 强制 LF（Unix 行尾） ----------
+# Shell 脚本必须 LF，否则 bash 执行报错
+*.sh text eol=lf
+*.bash text eol=lf
+
+# Python 源码统一 LF
+*.py text eol=lf
+*.pyi text eol=lf
+
+# Node.js / JavaScript 统一 LF
+*.js text eol=lf
+*.json text eol=lf
+
+# 配置文件统一 LF
+*.yaml text eol=lf
+*.yml text eol=lf
+*.toml text eol=lf
+*.ini text eol=lf
+*.cfg text eol=lf
+
+# 文档统一 LF
+*.md text eol=lf
+
+# Docker & K8s 统一 LF
+Dockerfile text eol=lf
+*.dockerignore text eol=lf
+
+# ---------- 二进制文件（不做转换） ----------
+*.png binary
+*.jpg binary
+*.jpeg binary
+*.gif binary
+*.ico binary
+*.svg binary
+*.woff binary
+*.woff2 binary
+*.ttf binary
+*.eot binary
+*.zip binary
+*.tar.gz binary
+*.7z binary
+*.rar binary
+*.whl binary
+*.pyc binary
+*.pyo binary
+*.so binary
+*.dll binary
+*.exe binary

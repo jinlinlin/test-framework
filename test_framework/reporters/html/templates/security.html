@@ -1,0 +1,36 @@
+<!-- 安全测试专项报告模板片段 -->
+<div class="security-section">
+    <h2>安全测试结果</h2>
+    {% if findings %}
+    <div class="finding-summary">
+        <span class="critical">严重: {{ findings | selectattr('severity', 'equalto', 'critical') | list | length }}</span>
+        <span class="high">高危: {{ findings | selectattr('severity', 'equalto', 'high') | list | length }}</span>
+        <span class="medium">中危: {{ findings | selectattr('severity', 'equalto', 'medium') | list | length }}</span>
+        <span class="low">低危: {{ findings | selectattr('severity', 'equalto', 'low') | list | length }}</span>
+    </div>
+    <table class="findings-table">
+        <thead>
+            <tr>
+                <th>漏洞类型</th>
+                <th>严重级别</th>
+                <th>目标 URL</th>
+                <th>载荷</th>
+                <th>详情</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for f in findings %}
+            <tr class="severity-{{ f.severity }}">
+                <td>{{ f.vulnerability_type | default('') }}</td>
+                <td><span class="badge badge-{{ f.severity }}">{{ f.severity }}</span></td>
+                <td>{{ f.target_url | default('') }}</td>
+                <td class="payload-cell">{{ f.payload | default('') | truncate(50) }}</td>
+                <td>{{ f.description | default('') }}</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+    {% else %}
+    <p class="no-findings">未发现安全漏洞</p>
+    {% endif %}
+</div>

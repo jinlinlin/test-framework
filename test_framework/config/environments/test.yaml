@@ -1,0 +1,14 @@
+# ============================================================
+# 测试环境配置 — 覆盖 base.yaml
+# 特点：INFO 日志、标准并发设置
+# ============================================================
+
+framework:
+  debug: false
+
+logging:
+  level: INFO
+
+concurrency:
+  max_workers: 8
+  max_async_tasks: 100

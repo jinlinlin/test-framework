@@ -1,0 +1,14 @@
+# ============================================================
+# 开发环境配置 — 覆盖 base.yaml
+# 特点：DEBUG 日志、调试模式开启
+# ============================================================
+
+framework:
+  debug: true
+
+logging:
+  level: DEBUG
+
+concurrency:
+  max_workers: 4
+  max_async_tasks: 50

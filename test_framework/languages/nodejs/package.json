@@ -1,0 +1,18 @@
+{
+  "name": "uniplore-test-framework-nodejs",
+  "version": "1.0.0",
+  "description": "Node.js bridge for uniplore test framework — 多语言桥接层 Node 端模块",
+  "main": "bridge.js",
+  "scripts": {
+    "test": "node --test",
+    "bridge": "node bridge.js"
+  },
+  "dependencies": {
+    "playwright": "^1.40.0",
+    "@grpc/grpc-js": "^1.9.0",
+    "ws": "^8.14.0",
+    "axios": "^1.6.0"
+  },
+  "keywords": ["test-framework", "bridge", "performance-testing"],
+  "license": "MIT"
+}

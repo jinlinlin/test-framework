@@ -1,0 +1,38 @@
+# api_test.yaml — REST API 测试样本配置
+test:
+  name: "API 功能回归测试"
+  type: "rest_api"
+  target:
+    base_url: "https://api.example.com/v1"
+    auth:
+      type: "bearer"
+      token_env: "API_TOKEN"
+  endpoints:
+    - path: "/users"
+      method: "GET"
+      expected_status: 200
+      schema:
+        type: "array"
+        items:
+          type: "object"
+          required: ["id", "name", "email"]
+    - path: "/users"
+      method: "POST"
+      body:
+        name: "测试用户"
+        email: "test@example.com"
+      expected_status: 201
+    - path: "/users/{id}"
+      method: "PUT"
+      body:
+        name: "更新用户"
+      expected_status: 200
+    - path: "/users/{id}"
+      method: "DELETE"
+      expected_status: 204
+  rate_limit:
+    requests_per_second: 10
+  timeout: 15
+  retry:
+    max_retries: 3
+    backoff: "exponential"

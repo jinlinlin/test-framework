@@ -1,0 +1,30 @@
+# db_test.yaml — 数据库测试样本配置
+test:
+  name: "数据库性能与功能测试"
+  type: "database"
+  target:
+    dialect: "postgresql"
+    host: "localhost"
+    port: 5432
+    database: "test_db"
+    user_env: "DB_USER"
+    password_env: "DB_PASSWORD"
+  connection_pool:
+    min_size: 2
+    max_size: 20
+    timeout: 10
+  queries:
+    - name: "用户查询"
+      sql: "SELECT * FROM users WHERE active = true LIMIT 100"
+      expected_max_ms: 50
+      explain: true
+    - name: "订单聚合"
+      sql: "SELECT user_id, COUNT(*) FROM orders GROUP BY user_id"
+      expected_max_ms: 200
+      explain: true
+    - name: "索引检查"
+      sql: "SELECT indexname FROM pg_indexes WHERE tablename = 'users'"
+      check_indexes: true
+  index_advisor:
+    enabled: true
+    min_improvement_pct: 10

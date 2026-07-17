@@ -1,0 +1,103 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "全局配置 Schema",
+  "description": "验证框架全局配置：框架信息、日志、输出目录等",
+  "type": "object",
+  "required": ["framework", "logging", "output"],
+  "properties": {
+    "framework": {
+      "type": "object",
+      "description": "框架基本信息",
+      "properties": {
+        "name": {
+          "type": "string",
+          "description": "框架名称"
+        },
+        "version": {
+          "type": "string",
+          "description": "框架版本号",
+          "pattern": "^[0-9]+\\.[0-9]+\\.[0-9]+"
+        },
+        "debug": {
+          "type": "boolean",
+          "description": "是否开启调试模式",
+          "default": false
+        }
+      }
+    },
+    "logging": {
+      "type": "object",
+      "description": "日志配置",
+      "properties": {
+        "level": {
+          "type": "string",
+          "description": "日志级别",
+          "enum": ["DEBUG", "INFO", "WARNING", "ERROR", "CRITICAL"]
+        },
+        "file": {
+          "type": "string",
+          "description": "日志文件路径"
+        },
+        "max_size_mb": {
+          "type": "integer",
+          "description": "单个日志文件最大大小（MB）",
+          "minimum": 1,
+          "maximum": 1024
+        },
+        "backup_count": {
+          "type": "integer",
+          "description": "日志文件保留数量",
+          "minimum": 1,
+          "maximum": 100
+        },
+        "format": {
+          "type": "string",
+          "description": "日志格式字符串"
+        },
+        "console_output": {
+          "type": "boolean",
+          "description": "是否同时输出到控制台",
+          "default": true
+        }
+      }
+    },
+    "output": {
+      "type": "object",
+      "description": "输出目录配置",
+      "properties": {
+        "reports_dir": {
+          "type": "string",
+          "description": "报告输出目录"
+        },
+        "results_dir": {
+          "type": "string",
+          "description": "测试结果输出目录"
+        },
+        "logs_dir": {
+          "type": "string",
+          "description": "日志输出目录"
+        },
+        "artifacts_dir": {
+          "type": "string",
+          "description": "制品输出目录"
+        }
+      }
+    },
+    "concurrency": {
+      "type": "object",
+      "description": "并发配置",
+      "properties": {
+        "max_workers": {
+          "type": "integer",
+          "description": "最大并发工作线程数",
+          "minimum": 1
+        },
+        "max_async_tasks": {
+          "type": "integer",
+          "description": "最大异步任务数",
+          "minimum": 1
+        }
+      }
+    }
+  }
+}

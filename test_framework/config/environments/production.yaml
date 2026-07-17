@@ -1,0 +1,24 @@
+# ============================================================
+# 生产环境配置 — 覆盖 base.yaml
+# 特点：WARNING 日志、高并发、严格资源限制
+# ============================================================
+
+framework:
+  debug: false
+
+logging:
+  level: WARNING
+  max_size_mb: 200
+  backup_count: 30
+
+concurrency:
+  max_workers: 32
+  max_async_tasks: 500
+
+adapters:
+  http:
+    pool_connections: 50
+    verify_ssl: true
+  database:
+    pool_min: 10
+    pool_max: 50

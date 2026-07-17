@@ -1,0 +1,35 @@
+# ============================================================
+# .flake8 — Python 代码风格检查配置
+# ============================================================
+[flake8]
+max-line-length = 120
+max-complexity = 15
+
+# 排除目录
+exclude =
+    .git,
+    __pycache__,
+    .venv,
+    venv,
+    build,
+    dist,
+    node_modules,
+    *.egg-info
+
+# 忽略的规则
+ignore =
+    # W503: 运算符换行（与 black 冲突）
+    W503,
+    # E203: 冒号前空格（与 black 冲突）
+    E203,
+    # E501: 行长度（由 black 控制）
+    E501
+
+# 每文件最大错误数
+max-errors = 50
+
+# 显示源代码
+show-source = True
+
+# 统计报告
+statistics = True

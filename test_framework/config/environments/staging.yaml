@@ -1,0 +1,16 @@
+# ============================================================
+# 预发布环境配置 — 覆盖 base.yaml
+# 特点：WARNING 日志、较高并发、接近生产环境
+# ============================================================
+
+framework:
+  debug: false
+
+logging:
+  level: WARNING
+  max_size_mb: 100
+  backup_count: 10
+
+concurrency:
+  max_workers: 16
+  max_async_tasks: 200

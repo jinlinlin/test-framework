@@ -1,0 +1,68 @@
+# ============================================================
+# pyproject.toml — 现代 Python 构建配置
+# ============================================================
+
+[build-system]
+requires = ["setuptools>=68.0", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "uniplore-test-framework"
+version = "1.0.0"
+description = "全维度工程化测试框架"
+requires-python = ">=3.10"
+license = {text = "MIT"}
+readme = "README.md"
+authors = [{name = "framework-team"}]
+
+[tool.setuptools.packages.find]
+where = ["."]
+include = ["test_framework*"]
+
+# ---------- pytest 配置 ----------
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+asyncio_mode = "auto"
+addopts = "-v --tb=short --strict-markers"
+markers = [
+    "unit: 单元测试",
+    "integration: 集成测试",
+    "slow: 耗时较长的测试",
+]
+
+# ---------- black 代码格式化 ----------
+[tool.black]
+line-length = 120
+target-version = ["py310", "py311", "py312"]
+include = '\.pyi?$'
+
+# ---------- isort import 排序 ----------
+[tool.isort]
+profile = "black"
+line_length = 120
+known_first_party = ["test_framework"]
+
+# ---------- mypy 类型检查 ----------
+[tool.mypy]
+python_version = "3.10"
+warn_return_any = true
+warn_unused_configs = true
+disallow_untyped_defs = true
+check_untyped_defs = true
+ignore_missing_imports = true
+
+# ---------- pylint ----------
+[tool.pylint.messages_control]
+disable = ["C0114", "C0115", "C0116", "R0903"]
+
+[tool.pylint.format]
+max-line-length = 120
+
+# ---------- coverage ----------
+[tool.coverage.run]
+source = ["test_framework"]
+omit = ["tests/*", "*/test_*"]
+
+[tool.coverage.report]
+show_missing = true
+fail_under = 80

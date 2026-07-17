@@ -1,0 +1,32 @@
+# ============================================================
+# 模板：数据库目标系统配置
+# 使用方式：复制此文件并替换 ${} 占位符为实际值
+# ============================================================
+
+target:
+  id: ${TARGET_ID}
+  name: ${TARGET_NAME}
+
+  # 数据库连接配置
+  database:
+    type: ${DB_TYPE}             # postgresql / mysql / mongodb / redis
+    host: ${DB_HOST}
+    port: ${DB_PORT}
+    database: ${DB_NAME}
+    username: ${DB_USERNAME}
+    password_env: ${DB_PASSWORD_ENV}  # 存储密码的环境变量名
+
+    # 连接池配置
+    pool:
+      min_size: ${POOL_MIN_SIZE}
+      max_size: ${POOL_MAX_SIZE}
+
+    # SSL 配置
+    ssl:
+      enabled: ${SSL_ENABLED}
+      ca_cert: ${SSL_CA_CERT}
+
+  # 元数据
+  metadata:
+    tech_stack: ${TECH_STACK}
+    environment: ${ENVIRONMENT}

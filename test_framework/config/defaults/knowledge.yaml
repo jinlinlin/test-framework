@@ -1,0 +1,43 @@
+# ============================================================
+# 知识库问答测试引擎 — 默认配置
+# ============================================================
+
+knowledge_qa:
+  # API 设置
+  api_url: ""          # 问答服务 API 地址
+  timeout: 30          # 请求超时（秒）
+  max_concurrent: 5    # 最大并发请求数
+
+  # 质量评估阈值
+  quality_thresholds:
+    relevance_score: 0.7      # 相关性分数阈值
+    completeness_score: 0.6   # 完整性分数阈值
+    faithfulness_score: 0.8   # 忠实度分数阈值（是否基于检索内容回答）
+    coherence_score: 0.7      # 连贯性分数阈值
+
+  # 检索测试配置
+  retrieval:
+    top_k: 5                    # 返回的检索文档数量
+    similarity_threshold: 0.75  # 相似度阈值
+    rerank_enabled: false       # 是否启用重排序
+
+  # 嵌入分析配置
+  embedding:
+    model: ""                   # 嵌入模型名称
+    dimensions: 768             # 向量维度
+    similarity_metric: cosine   # 相似度度量方式（cosine / euclidean）
+
+  # RAG 评估配置
+  rag_evaluation:
+    enabled: true
+    metrics:
+      - answer_relevancy
+      - context_precision
+      - context_recall
+      - faithfulness
+
+  # 上下文验证配置
+  context_validator:
+    max_context_length: 8000   # 最大上下文字符数
+    check_format: true         # 是否检查格式
+    check_encoding: true       # 是否检查编码

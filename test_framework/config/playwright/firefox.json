@@ -1,0 +1,11 @@
+{
+  "browser_type": "firefox",
+  "headless": true,
+  "viewport": {
+    "width": 1920,
+    "height": 1080
+  },
+  "device_scale_factor": 1.0,
+  "locale": "zh-CN",
+  "timezone_id": "Asia/Shanghai"
+}

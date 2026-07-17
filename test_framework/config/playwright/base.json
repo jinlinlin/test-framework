@@ -1,0 +1,20 @@
+{
+  "headless": true,
+  "viewport": {
+    "width": 1920,
+    "height": 1080
+  },
+  "device_scale_factor": 1.0,
+  "locale": "zh-CN",
+  "timezone_id": "Asia/Shanghai",
+  "permissions": [],
+  "downloads_path": null,
+  "user_agent": null,
+  "ignore_https_errors": false,
+  "slow_mo": 0,
+  "record_video_dir": null,
+  "record_har_path": null,
+  "trace_dir": null,
+  "screenshot_on_failure": true,
+  "video_on_failure": true
+}

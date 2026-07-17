@@ -1,0 +1,15 @@
+<!-- 测试概览模板片段 - 被 base.html 包含使用 -->
+<div class="summary-section">
+    <h2>测试概览</h2>
+    <div class="summary-cards">
+        <div class="card total"><h3>{{ total }}</h3><p>总用例数</p></div>
+        <div class="card pass"><h3>{{ passed }}</h3><p>通过</p></div>
+        <div class="card fail"><h3>{{ failed }}</h3><p>失败</p></div>
+        <div class="card skip"><h3>{{ skipped }}</h3><p>跳过</p></div>
+    </div>
+    <div class="metrics-grid">
+        <div class="metric"><span class="label">通过率</span><span class="value">{{ pass_rate }}%</span></div>
+        <div class="metric"><span class="label">总耗时</span><span class="value">{{ total_duration }}s</span></div>
+        <div class="metric"><span class="label">错误数</span><span class="value">{{ errors }}</span></div>
+    </div>
+</div>

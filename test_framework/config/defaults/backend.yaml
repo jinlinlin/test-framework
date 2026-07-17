@@ -1,0 +1,49 @@
+# ============================================================
+# 后端性能测试引擎 — 默认配置
+# ============================================================
+
+backend_performance:
+  # 协议设置
+  protocol: http  # http / grpc / websocket
+
+  # 并发设置
+  concurrency: 100
+  duration: 300       # 测试持续时间（秒）
+  ramp_up: 30         # 预热时间（秒）
+  ramp_down: 10       # 降温时间（秒）
+
+  # 负载模型
+  load_profile: constant  # constant / step / spike / soak
+
+  # HTTP 设置
+  http:
+    method: GET
+    headers: {}
+    body: null
+    timeout: 30
+
+  # gRPC 设置
+  grpc:
+    proto_file: null
+    service: null
+    method: null
+    metadata: {}
+
+  # 资源监控
+  resource_monitoring:
+    enabled: true
+    interval: 5       # 采集间隔（秒）
+    targets:
+      - jvm           # Java 虚拟机
+      - go_runtime    # Go 运行时
+      - node_js       # Node.js
+      - python        # Python 进程
+      - container     # Docker/K8s 容器
+
+  # 性能阈值
+  thresholds:
+    response_time_p50: 200    # P50 响应时间（毫秒）
+    response_time_p95: 500    # P95 响应时间（毫秒）
+    response_time_p99: 1000   # P99 响应时间（毫秒）
+    error_rate: 0.01          # 最大错误率
+    throughput_min: 1000      # 最小吞吐量（req/s）

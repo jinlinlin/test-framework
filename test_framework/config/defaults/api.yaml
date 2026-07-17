@@ -1,0 +1,45 @@
+# ============================================================
+# REST API 测试引擎 — 默认配置
+# ============================================================
+
+rest_api:
+  # 基础设置
+  timeout: 30          # 请求超时（秒）
+  max_retries: 3       # 最大重试次数
+  verify_ssl: true     # 是否验证 SSL 证书
+  follow_redirects: true
+
+  # 限流设置
+  rate_limit:
+    enabled: false
+    requests_per_second: 100
+    burst_size: 20
+
+  # 认证设置
+  auth:
+    type: none         # none / basic / bearer / oauth2
+    # basic 认证
+    username: ""
+    password: ""
+    # bearer 认证
+    token: ""
+    # oauth2 认证
+    oauth2:
+      client_id: ""
+      client_secret: ""
+      token_url: ""
+      scope: ""
+
+  # 响应校验
+  validation:
+    schema_check: true      # 是否校验 JSON Schema
+    contract_check: false   # 是否进行契约测试
+    status_code_check: true # 是否校验状态码
+    headers_check: false    # 是否校验响应头
+
+  # 请求日志
+  logging:
+    log_request: true
+    log_response: true
+    log_body: true
+    max_body_length: 10000  # 日志中 body 最大字符数

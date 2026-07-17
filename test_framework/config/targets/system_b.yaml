@@ -1,0 +1,40 @@
+# ============================================================
+# 被测系统 B 配置示例 — 后端微服务
+# ============================================================
+
+target:
+  id: system_b
+  name: "System B - Backend Microservice"
+  base_url: http://localhost:9090
+  host: localhost
+  port: 9090
+  protocol: http
+
+  # 认证配置
+  auth:
+    type: basic
+    username: admin
+    password_env: SYSTEM_B_PASSWORD  # 从环境变量读取密码
+
+  # 元数据
+  metadata:
+    tech_stack:
+      - java
+      - spring-boot
+    environment: test
+    description: "示例后端微服务系统"
+
+  # gRPC 端点
+  grpc:
+    host: localhost
+    port: 50051
+    proto_file: protos/service.proto
+
+  # 数据库连接
+  database:
+    type: postgresql
+    host: localhost
+    port: 5432
+    database: system_b_db
+    username: test_user
+    password_env: SYSTEM_B_DB_PASSWORD

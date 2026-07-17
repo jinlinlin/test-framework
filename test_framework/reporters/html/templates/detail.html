@@ -1,0 +1,30 @@
+<!-- 详细结果模板片段 -->
+<div class="detail-section">
+    <h2>详细结果</h2>
+    <table class="results-table">
+        <thead>
+            <tr>
+                <th>#</th>
+                <th>测试用例</th>
+                <th>套件</th>
+                <th>状态</th>
+                <th>耗时(s)</th>
+                <th>指标</th>
+                <th>错误信息</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for r in results %}
+            <tr class="row-{{ r.status | default('unknown') }}">
+                <td>{{ loop.index }}</td>
+                <td>{{ r.test_name | default('') }}</td>
+                <td>{{ r.suite_name | default('') }}</td>
+                <td class="status-{{ r.status }}">{{ r.status | default('unknown') }}</td>
+                <td>{{ "%.3f" | format(r.duration | default(0)) }}</td>
+                <td>{{ r.metrics | default({}) | tojson }}</td>
+                <td class="error-msg">{{ r.error_message | default('') }}</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>

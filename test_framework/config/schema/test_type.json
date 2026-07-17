@@ -1,0 +1,228 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "测试类型配置 Schema",
+  "description": "验证七大测试引擎的配置参数",
+  "type": "object",
+  "properties": {
+    "engines": {
+      "type": "object",
+      "description": "测试引擎配置集合",
+      "properties": {
+        "web_performance": {
+          "$ref": "#/definitions/web_perf_config"
+        },
+        "backend_performance": {
+          "$ref": "#/definitions/backend_perf_config"
+        },
+        "rest_api": {
+          "$ref": "#/definitions/rest_api_config"
+        },
+        "database": {
+          "$ref": "#/definitions/database_config"
+        },
+        "knowledge_qa": {
+          "$ref": "#/definitions/knowledge_qa_config"
+        },
+        "penetration": {
+          "$ref": "#/definitions/penetration_config"
+        },
+        "auth_bypass": {
+          "$ref": "#/definitions/auth_bypass_config"
+        }
+      }
+    }
+  },
+  "definitions": {
+    "web_perf_config": {
+      "type": "object",
+      "description": "网页性能测试引擎配置",
+      "properties": {
+        "browser": {
+          "type": "string",
+          "enum": ["chromium", "firefox", "webkit"]
+        },
+        "headless": { "type": "boolean" },
+        "timeout": { "type": "integer", "minimum": 1000 },
+        "viewport": {
+          "type": "object",
+          "properties": {
+            "width": { "type": "integer", "minimum": 320 },
+            "height": { "type": "integer", "minimum": 240 }
+          }
+        },
+        "lighthouse": {
+          "type": "object",
+          "properties": {
+            "enabled": { "type": "boolean" },
+            "categories": {
+              "type": "array",
+              "items": { "type": "string" }
+            }
+          }
+        },
+        "web_vitals": {
+          "type": "object",
+          "properties": {
+            "metrics": {
+              "type": "array",
+              "items": { "type": "string" }
+            },
+            "thresholds": { "type": "object" }
+          }
+        }
+      }
+    },
+    "backend_perf_config": {
+      "type": "object",
+      "description": "后端性能测试引擎配置",
+      "properties": {
+        "protocol": {
+          "type": "string",
+          "enum": ["http", "grpc", "websocket"]
+        },
+        "concurrency": { "type": "integer", "minimum": 1 },
+        "duration": { "type": "integer", "minimum": 1 },
+        "ramp_up": { "type": "integer", "minimum": 0 },
+        "load_profile": {
+          "type": "string",
+          "enum": ["constant", "step", "spike", "soak"]
+        },
+        "resource_monitoring": {
+          "type": "object",
+          "properties": {
+            "enabled": { "type": "boolean" },
+            "interval": { "type": "integer", "minimum": 1 }
+          }
+        }
+      }
+    },
+    "rest_api_config": {
+      "type": "object",
+      "description": "REST API 测试引擎配置",
+      "properties": {
+        "timeout": { "type": "integer", "minimum": 1 },
+        "max_retries": { "type": "integer", "minimum": 0 },
+        "verify_ssl": { "type": "boolean" },
+        "rate_limit": {
+          "type": "object",
+          "properties": {
+            "enabled": { "type": "boolean" },
+            "requests_per_second": { "type": "integer", "minimum": 1 }
+          }
+        },
+        "auth": {
+          "type": "object",
+          "properties": {
+            "type": {
+              "type": "string",
+              "enum": ["none", "basic", "bearer", "oauth2"]
+            }
+          }
+        },
+        "validation": {
+          "type": "object",
+          "properties": {
+            "schema_check": { "type": "boolean" },
+            "contract_check": { "type": "boolean" }
+          }
+        }
+      }
+    },
+    "database_config": {
+      "type": "object",
+      "description": "数据库测试引擎配置",
+      "properties": {
+        "pool": {
+          "type": "object",
+          "properties": {
+            "min_size": { "type": "integer", "minimum": 1 },
+            "max_size": { "type": "integer", "minimum": 1 },
+            "idle_timeout": { "type": "integer", "minimum": 0 }
+          }
+        },
+        "query": {
+          "type": "object",
+          "properties": {
+            "timeout": { "type": "integer", "minimum": 1 },
+            "explain": { "type": "boolean" }
+          }
+        },
+        "index_advisor": {
+          "type": "object",
+          "properties": {
+            "enabled": { "type": "boolean" },
+            "min_improvement_pct": { "type": "integer", "minimum": 1 }
+          }
+        }
+      }
+    },
+    "knowledge_qa_config": {
+      "type": "object",
+      "description": "知识库问答测试引擎配置",
+      "properties": {
+        "api_url": { "type": "string" },
+        "timeout": { "type": "integer", "minimum": 1 },
+        "quality_thresholds": {
+          "type": "object",
+          "properties": {
+            "relevance_score": { "type": "number", "minimum": 0, "maximum": 1 },
+            "completeness_score": { "type": "number", "minimum": 0, "maximum": 1 },
+            "faithfulness_score": { "type": "number", "minimum": 0, "maximum": 1 }
+          }
+        },
+        "retrieval": {
+          "type": "object",
+          "properties": {
+            "top_k": { "type": "integer", "minimum": 1 },
+            "similarity_threshold": { "type": "number", "minimum": 0, "maximum": 1 }
+          }
+        }
+      }
+    },
+    "penetration_config": {
+      "type": "object",
+      "description": "渗透测试引擎配置",
+      "properties": {
+        "scan_types": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "enum": ["sql_injection", "xss", "path_traversal", "command_injection", "ssrf", "xxe"]
+          }
+        },
+        "max_payloads": { "type": "integer", "minimum": 1 },
+        "timeout": { "type": "integer", "minimum": 1 },
+        "severity_filter": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "enum": ["critical", "high", "medium", "low", "info"]
+          }
+        },
+        "report_format": {
+          "type": "string",
+          "enum": ["html", "json", "xml"]
+        }
+      }
+    },
+    "auth_bypass_config": {
+      "type": "object",
+      "description": "越权测试引擎配置",
+      "properties": {
+        "strategies": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "enum": ["role_escalation", "session_fixation", "token_replay", "jwt_attack", "oauth_attack", "idor"]
+          }
+        },
+        "timeout": { "type": "integer", "minimum": 1 },
+        "max_attempts": { "type": "integer", "minimum": 1 },
+        "detection_sensitivity": {
+          "type": "string",
+          "enum": ["low", "medium", "high"]
+        }
+      }
+    }
+  }
+}

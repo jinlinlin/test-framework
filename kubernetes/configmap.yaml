@@ -1,0 +1,14 @@
+# Kubernetes ConfigMap — 框架配置
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: test-framework-config
+  labels:
+    app: test-framework
+data:
+  environment: "test"
+  log_level: "INFO"
+  reports_dir: "/app/reports"
+  results_dir: "/app/results"
+  parallel: "true"
+  max_concurrency: "10"

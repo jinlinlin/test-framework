@@ -1,0 +1,18 @@
+{
+  "browser_type": "chromium",
+  "headless": true,
+  "viewport": {
+    "width": 1920,
+    "height": 1080
+  },
+  "device_scale_factor": 1.0,
+  "locale": "zh-CN",
+  "timezone_id": "Asia/Shanghai",
+  "args": [
+    "--disable-blink-features=AutomationControlled",
+    "--disable-dev-shm-usage",
+    "--no-sandbox",
+    "--disable-setuid-sandbox",
+    "--disable-gpu"
+  ]
+}

@@ -1,0 +1,89 @@
+# ============================================================
+# .gitignore — 版本控制排除规则
+# ============================================================
+
+# ---------- Python ----------
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+*.egg-info/
+*.egg
+dist/
+build/
+.venv/
+venv/
+env/
+*.pyi
+.ruff_cache/
+
+# ---------- Node.js ----------
+node_modules/
+nodejs_modules/node_modules/
+*.tsbuildinfo
+.eslintcache
+.prettierignore
+
+# ---------- 环境变量（敏感文件） ----------
+.env
+.env.local
+.env.*.local
+
+# ---------- 日志与输出 ----------
+logs/*.log
+logs/execution/
+reports/*.html
+results/*.json
+artifacts/*
+!artifacts/.keep
+backups/
+
+# ---------- IDE ----------
+.vscode/
+!.vscode/settings.json
+.idea/
+*.swp
+*.swo
+*~
+*.sublime-project
+*.sublime-workspace
+.project
+.classpath
+.settings/
+
+# ---------- 操作系统 ----------
+.DS_Store
+Thumbs.db
+desktop.ini
+ehthumbs.db
+
+# ---------- 测试与覆盖 ----------
+htmlcov/
+.coverage
+.coverage.*
+coverage.xml
+.tox/
+.nox/
+
+# ---------- mypy 缓存 ----------
+.mypy_cache/
+
+# ---------- pytest 缓存 ----------
+.pytest_cache/
+
+# ---------- Docker ----------
+docker/.env
+
+# ---------- 构建产物 ----------
+*.whl
+*.tar.gz
+*.zip
+*.rar
+*.7z
+
+# ---------- 临时文件 ----------
+*.tmp
+*.bak
+*.orig
+*.log
+

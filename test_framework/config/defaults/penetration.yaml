@@ -1,0 +1,57 @@
+# ============================================================
+# 渗透测试引擎 — 默认配置
+# ============================================================
+
+penetration:
+  # 扫描类型（可同时启用多种）
+  scan_types:
+    - sql_injection
+    - xss
+    - path_traversal
+    - command_injection
+    - ssrf
+    - xxe
+
+  # 扫描设置
+  max_payloads: 1000     # 每种扫描类型的最大 payload 数量
+  timeout: 60            # 单个请求超时（秒）
+  concurrency: 10        # 并发扫描线程数
+
+  # 严重等级过滤
+  severity_filter:
+    - critical
+    - high
+    - medium
+    - low
+    - info
+
+  # 报告设置
+  report_format: html    # html / json / xml
+  include_request: true  # 报告中包含请求详情
+  include_response: true # 报告中包含响应详情
+
+  # 各扫描类型的特定配置
+  sql_injection:
+    techniques:
+      - union_based
+      - error_based
+      - blind_boolean
+      - blind_time
+    dbms: auto           # auto / mysql / postgresql / mssql / oracle
+
+  xss:
+    types:
+      - reflected
+      - stored
+      - dom_based
+    encode_payloads: true
+
+  path_traversal:
+    max_depth: 5         # 最大路径深度
+    os: auto             # auto / linux / windows
+
+  ssrf:
+    internal_ranges:
+      - 10.0.0.0/8
+      - 172.16.0.0/12
+      - 192.168.0.0/16

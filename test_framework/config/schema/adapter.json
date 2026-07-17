@@ -1,0 +1,94 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "适配器配置 Schema",
+  "description": "验证各适配器层的配置参数",
+  "type": "object",
+  "properties": {
+    "adapters": {
+      "type": "object",
+      "description": "适配器配置集合",
+      "properties": {
+        "http": {
+          "type": "object",
+          "description": "HTTP 适配器配置",
+          "properties": {
+            "backend": {
+              "type": "string",
+              "description": "使用的 HTTP 后端",
+              "enum": ["requests", "httpx", "aiohttp"],
+              "default": "httpx"
+            },
+            "timeout": {
+              "type": "integer",
+              "description": "全局超时时间（秒）",
+              "minimum": 1
+            },
+            "max_retries": {
+              "type": "integer",
+              "description": "最大重试次数",
+              "minimum": 0
+            },
+            "pool_connections": {
+              "type": "integer",
+              "description": "连接池大小",
+              "minimum": 1
+            },
+            "verify_ssl": {
+              "type": "boolean",
+              "description": "是否验证 SSL 证书",
+              "default": true
+            }
+          }
+        },
+        "browser": {
+          "type": "object",
+          "description": "浏览器适配器配置",
+          "properties": {
+            "backend": {
+              "type": "string",
+              "enum": ["playwright", "selenium"],
+              "default": "playwright"
+            },
+            "headless": { "type": "boolean" },
+            "browser_type": {
+              "type": "string",
+              "enum": ["chromium", "firefox", "webkit"]
+            }
+          }
+        },
+        "database": {
+          "type": "object",
+          "description": "数据库适配器配置",
+          "properties": {
+            "backend": {
+              "type": "string",
+              "enum": ["asyncpg", "aiomysql", "motor", "redis"]
+            },
+            "pool_min": { "type": "integer", "minimum": 1 },
+            "pool_max": { "type": "integer", "minimum": 1 }
+          }
+        },
+        "messaging": {
+          "type": "object",
+          "description": "消息队列适配器配置",
+          "properties": {
+            "backend": {
+              "type": "string",
+              "enum": ["kafka", "rabbitmq"]
+            }
+          }
+        },
+        "load_generator": {
+          "type": "object",
+          "description": "负载生成器适配器配置",
+          "properties": {
+            "backend": {
+              "type": "string",
+              "enum": ["jmeter", "locust", "k6"]
+            }
+          }
+        }
+      }
+    }
+  }
+}

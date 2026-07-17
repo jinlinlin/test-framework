@@ -1,0 +1,54 @@
+# ============================================================
+# 网页性能测试引擎 — 默认配置
+# ============================================================
+
+web_performance:
+  # 浏览器设置
+  browser: chromium
+  headless: true
+  timeout: 30000  # 页面加载超时（毫秒）
+
+  # 视口设置
+  viewport:
+    width: 1920
+    height: 1080
+
+  # Lighthouse 集成
+  lighthouse:
+    enabled: true
+    categories:
+      - performance
+      - accessibility
+      - best-practices
+      - seo
+    throttling:
+      rtt_ms: 150
+      throughput_kbps: 1638
+      cpu_slowdown_multiplier: 4
+
+  # Web Vitals 指标
+  web_vitals:
+    metrics:
+      - FCP    # First Contentful Paint
+      - LCP    # Largest Contentful Paint
+      - CLS    # Cumulative Layout Shift
+      - FID    # First Input Delay
+      - INP    # Interaction to Next Paint
+      - TTFB   # Time to First Byte
+    # 性能阈值（毫秒/分数）
+    thresholds:
+      FCP: 1800
+      LCP: 2500
+      CLS: 0.1
+      FID: 100
+      INP: 200
+      TTFB: 800
+
+  # 资源监控
+  resource_monitor:
+    enabled: true
+    track_js: true
+    track_css: true
+    track_images: true
+    track_fonts: true
+    track_api_calls: true

@@ -1,0 +1,66 @@
+# ============================================================
+# 基础配置 — 所有环境共享的默认值
+# 环境特定配置通过 dev.yaml / test.yaml 等覆盖
+# ============================================================
+
+framework:
+  name: uniplore-test-framework
+  version: "1.0.0"
+  debug: false
+
+# 日志配置
+logging:
+  level: INFO
+  file: logs/framework.log
+  max_size_mb: 50
+  backup_count: 5
+  format: "%(asctime)s [%(levelname)s] %(name)s: %(message)s"
+  console_output: true
+
+# 输出目录配置
+output:
+  reports_dir: reports
+  results_dir: results
+  logs_dir: logs
+  artifacts_dir: artifacts
+
+# 并发配置
+concurrency:
+  max_workers: 8
+  max_async_tasks: 100
+
+# 适配器默认配置
+adapters:
+  http:
+    backend: httpx
+    timeout: 30
+    max_retries: 3
+    pool_connections: 10
+    verify_ssl: true
+  browser:
+    backend: playwright
+    headless: true
+    browser_type: chromium
+  database:
+    pool_min: 5
+    pool_max: 20
+  messaging:
+    backend: kafka
+  load_generator:
+    backend: locust
+
+# 报告配置
+reporters:
+  default_format: html
+  output_dir: reports
+  auto_generate: true
+  external:
+    allure:
+      enabled: false
+      output_dir: allure-results
+    webhook:
+      enabled: false
+      url: ""
+      events:
+        - test_completed
+        - test_failed

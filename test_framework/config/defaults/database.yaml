@@ -1,0 +1,37 @@
+# ============================================================
+# 数据库测试引擎 — 默认配置
+# ============================================================
+
+database:
+  # 连接池设置
+  pool:
+    min_size: 5        # 最小连接数
+    max_size: 20       # 最大连接数
+    idle_timeout: 300  # 空闲连接超时（秒）
+    acquire_timeout: 30  # 获取连接超时（秒）
+
+  # 查询设置
+  query:
+    timeout: 60        # 查询超时（秒）
+    explain: true      # 是否自动 EXPLAIN 分析
+    slow_query_threshold: 1000  # 慢查询阈值（毫秒）
+
+  # 索引建议器
+  index_advisor:
+    enabled: true
+    min_improvement_pct: 10  # 最小改进百分比才建议
+
+  # 支持的数据库类型及方言
+  dialects:
+    postgresql:
+      port: 5432
+      ssl_mode: prefer
+    mysql:
+      port: 3306
+      charset: utf8mb4
+    mongodb:
+      port: 27017
+      auth_source: admin
+    redis:
+      port: 6379
+      db: 0

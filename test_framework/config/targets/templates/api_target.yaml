@@ -1,0 +1,28 @@
+# ============================================================
+# 模板：API 目标系统配置
+# 使用方式：复制此文件并替换 ${} 占位符为实际值
+# ============================================================
+
+target:
+  id: ${TARGET_ID}
+  name: ${TARGET_NAME}
+  base_url: ${BASE_URL}
+  host: ${HOST}
+  port: ${PORT}
+  protocol: ${PROTOCOL}  # http / https
+
+  # 认证配置
+  auth:
+    type: ${AUTH_TYPE}           # none / basic / bearer / oauth2
+    token_env: ${AUTH_TOKEN_ENV} # 存储认证令牌的环境变量名
+
+  # API 测试特定配置
+  api:
+    version: ${API_VERSION}      # 如 v1 / v2
+    content_type: application/json
+    accept: application/json
+
+  # 元数据
+  metadata:
+    tech_stack: ${TECH_STACK}
+    environment: ${ENVIRONMENT}

@@ -1,0 +1,37 @@
+# ============================================================
+# 被测系统 A 配置示例 — Web 应用
+# ============================================================
+
+target:
+  id: system_a
+  name: "System A - Web Application"
+  base_url: http://localhost:8080
+  host: localhost
+  port: 8080
+  protocol: http
+
+  # 认证配置
+  auth:
+    type: bearer
+    token_env: SYSTEM_A_TOKEN   # 从环境变量读取 token
+
+  # 元数据
+  metadata:
+    tech_stack:
+      - python
+      - fastapi
+    environment: test
+    description: "示例 Web 应用系统"
+
+  # 测试范围
+  test_scope:
+    # 需要测试的端点
+    endpoints:
+      - path: /api/v1/users
+        methods: [GET, POST, PUT, DELETE]
+      - path: /api/v1/products
+        methods: [GET, POST]
+    # 排除的端点
+    exclude:
+      - path: /health
+      - path: /metrics

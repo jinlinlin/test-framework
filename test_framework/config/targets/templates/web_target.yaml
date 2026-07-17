@@ -1,0 +1,28 @@
+# ============================================================
+# 模板：Web 目标系统配置
+# 使用方式：复制此文件并替换 ${} 占位符为实际值
+# ============================================================
+
+target:
+  id: ${TARGET_ID}
+  name: ${TARGET_NAME}
+  base_url: ${BASE_URL}
+  host: ${HOST}
+  port: ${PORT}
+  protocol: ${PROTOCOL}  # http / https
+
+  # 认证配置
+  auth:
+    type: ${AUTH_TYPE}           # none / basic / bearer / oauth2
+    token_env: ${AUTH_TOKEN_ENV} # 存储认证令牌的环境变量名
+
+  # 浏览器测试特定配置
+  browser:
+    viewport:
+      width: ${VIEWPORT_WIDTH}
+      height: ${VIEWPORT_HEIGHT}
+
+  # 元数据
+  metadata:
+    tech_stack: ${TECH_STACK}    # 列表形式 [python, fastapi]
+    environment: ${ENVIRONMENT}  # dev / test / staging / production

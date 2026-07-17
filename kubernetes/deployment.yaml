@@ -1,0 +1,77 @@
+# Kubernetes Deployment — 测试框架 Pod 配置
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: test-framework
+  labels:
+    app: test-framework
+    version: v1
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: test-framework
+  template:
+    metadata:
+      labels:
+        app: test-framework
+        version: v1
+    spec:
+      containers:
+        - name: framework
+          image: test-framework:latest
+          imagePullPolicy: IfNotPresent
+          resources:
+            requests:
+              cpu: "500m"
+              memory: "512Mi"
+            limits:
+              cpu: "2000m"
+              memory: "2Gi"
+          env:
+            - name: TF_ENV
+              valueFrom:
+                configMapKeyRef:
+                  name: test-framework-config
+                  key: environment
+            - name: TF_LOG_LEVEL
+              valueFrom:
+                configMapKeyRef:
+                  name: test-framework-config
+                  key: log_level
+            - name: REDIS_URL
+              valueFrom:
+                secretKeyRef:
+                  name: test-framework-secrets
+                  key: redis_url
+            - name: POSTGRES_URL
+              valueFrom:
+                secretKeyRef:
+                  name: test-framework-secrets
+                  key: postgres_url
+          ports:
+            - containerPort: 8080
+              name: http
+          readinessProbe:
+            httpGet:
+              path: /health
+              port: 8080
+            initialDelaySeconds: 10
+            periodSeconds: 5
+          livenessProbe:
+            httpGet:
+              path: /health
+              port: 8080
+            initialDelaySeconds: 30
+            periodSeconds: 10
+          volumeMounts:
+            - name: config-volume
+              mountPath: /app/config
+            - name: results-volume
+              mountPath: /app/results
+      volumes:
+        - name: config-volume
+          configMap:
+            name: test-framework-config
+        - name: results-volume
+          emptyDir: {}
