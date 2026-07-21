@@ -1,0 +1,16 @@
+# ============================================================
+# pnpm 配置文件
+# 强制使用 pnpm 作为 Node.js 包管理器
+# ============================================================
+
+# 严格模式：任何配置不匹配都会导致安装失败
+strict-peer-dependencies=true
+
+# 启用生命周期脚本（如 preinstall）
+enable-pre-post-scripts=true
+
+# 存储路径配置
+store-dir=${HOME}/.pnpm-store
+
+# 启用 pnpm workspace（如果需要）
+# workspace-dir=..

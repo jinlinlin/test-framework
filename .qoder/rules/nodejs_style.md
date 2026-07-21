@@ -1,5 +1,36 @@
 # Node.js 编码规范
 
+## 包管理器规范
+
+- **强制使用 pnpm** 作为 Node.js 包管理器
+- 禁止使用 npm 或 yarn 安装依赖
+- 项目根目录必须包含 `.pnpmrc` 配置文件
+- `package.json` 必须包含 `preinstall` 脚本强制使用 pnpm
+
+### 安装命令
+
+```bash
+# 安装依赖（推荐）
+pnpm install
+
+# 添加依赖
+pnpm add <package>
+
+# 添加开发依赖
+pnpm add -D <package>
+
+# 更新依赖
+pnpm update
+
+# 安装指定版本
+pnpm add <package>@<version>
+```
+
+### 配置要求
+
+- `.pnpmrc` 文件必须配置 `strict-peer-dependencies=true`
+- `package.json` 必须包含 `engines` 字段指定 Node.js 版本要求
+
 ## 命名规范
 - 文件名：小写 + 下划线（snake_case）或 camelCase，如 `bridge.js`, `apiLoadTest.js`
 - 类名：大驼峰（PascalCase），如 `NodeRestAPIEngine`

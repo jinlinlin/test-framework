@@ -49,13 +49,14 @@ check_node() {
     fi
 }
 
-check_npm() {
-    if command -v npm &>/dev/null; then
-        NPM_VER=$(npm --version)
-        log_info "npm $NPM_VER 已安装"
+check_pnpm() {
+    if command -v pnpm &>/dev/null; then
+        PNPM_VER=$(pnpm --version)
+        log_info "pnpm $PNPM_VER 已安装"
     else
-        log_error "npm 未安装"
+        log_error "pnpm 未安装"
         ERRORS=$((ERRORS + 1))
+        [ "$CHECK_ONLY" = false ] && log_warn "请安装 pnpm: npm install -g pnpm"
     fi
 }
 
@@ -77,20 +78,43 @@ check_playwright() {
 install_python_deps() {
     log_info "安装 Python 依赖..."
     local req_file="$FRAMEWORK_ROOT/python_modules/requirements.txt"
-    if [ -f "$req_file" ]; then
-        pip install -r "$req_file"
-        log_info "Python 依赖安装完成"
+    local pyproject_file="$FRAMEWORK_ROOT/python_modules/pyproject.toml"
+    
+    if command -v uv &>/dev/null; then
+        log_info "使用 uv 安装 Python 依赖..."
+        if [ -f "$pyproject_file" ]; then
+            cd "$FRAMEWORK_ROOT/python_modules" && uv pip install -r "$req_file"
+        elif [ -f "$req_file" ]; then
+            uv pip install -r "$req_file"
+        else
+            log_warn "requirements.txt 不存在: $req_file"
+        fi
+    elif command -v pip &>/dev/null; then
+        log_info "使用 pip 安装 Python 依赖..."
+        if [ -f "$req_file" ]; then
+            pip install -r "$req_file"
+        else
+            log_warn "requirements.txt 不存在: $req_file"
+        fi
     else
-        log_warn "requirements.txt 不存在: $req_file"
+        log_error "uv 和 pip 都未安装，无法安装 Python 依赖"
+        ERRORS=$((ERRORS + 1))
+        return
     fi
+    log_info "Python 依赖安装完成"
 }
 
 install_node_deps() {
     log_info "安装 Node.js 依赖..."
     local node_dir="$FRAMEWORK_ROOT/nodejs_modules"
     if [ -d "$node_dir" ] && [ -f "$node_dir/package.json" ]; then
-        cd "$node_dir" && npm install
-        log_info "Node.js 依赖安装完成"
+        if command -v pnpm &>/dev/null; then
+            cd "$node_dir" && pnpm install
+            log_info "Node.js 依赖安装完成"
+        else
+            log_error "pnpm 未安装，请先安装: npm install -g pnpm"
+            ERRORS=$((ERRORS + 1))
+        fi
     else
         log_warn "nodejs_modules/package.json 不存在"
     fi
@@ -102,7 +126,7 @@ install_node_deps() {
 log_info "=== 环境检测 ==="
 check_python
 check_node
-check_npm
+check_pnpm
 check_playwright
 
 if [ "$CHECK_ONLY" = true ]; then

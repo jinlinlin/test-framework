@@ -1,5 +1,60 @@
 # Python 编码规范
 
+## 包管理器规范
+
+- **支持包管理器**: pip, uv
+- 推荐使用 uv 作为默认包管理器（更快、更可靠）
+- 项目使用 `pyproject.toml` 作为构建配置
+- 依赖声明使用 `requirements.txt` 和 `requirements-dev.txt`
+
+### 安装命令
+
+```bash
+# 使用 uv（推荐）
+uv pip install -r requirements.txt
+uv pip install -r requirements-dev.txt
+
+# 使用 pip
+pip install -r requirements.txt
+pip install -r requirements-dev.txt
+
+# 安装为开发模式（支持热重载）
+uv pip install -e .
+# 或
+pip install -e .
+```
+
+### 依赖管理
+
+- 运行时依赖：`python_modules/requirements.txt`
+- 开发依赖：`python_modules/requirements-dev.txt`
+- 构建配置：`python_modules/pyproject.toml`
+
+### uv 使用建议
+
+```bash
+# 创建虚拟环境
+uv venv
+
+# 激活虚拟环境（Windows）
+.\.venv\Scripts\activate
+
+# 激活虚拟环境（Unix）
+source .venv/bin/activate
+
+# 安装依赖
+uv pip install -r requirements.txt
+
+# 添加新依赖
+uv pip add <package>
+
+# 更新依赖
+uv pip install --upgrade <package>
+
+# 生成锁文件
+uv pip compile requirements.txt -o requirements.lock
+```
+
 ## 命名规范
 - 模块/文件名：全小写 + 下划线（snake_case），如 `engine_factory.py`
 - 类名：大驼峰（PascalCase），如 `WebPerformanceEngine`

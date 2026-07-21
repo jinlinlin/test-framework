@@ -4,6 +4,7 @@
   "description": "Node.js 高性能辅助引擎 — API 压测 / WebSocket / gRPC",
   "main": "bridge.js",
   "scripts": {
+    "preinstall": "node -e \"if(!process.env.npm_config_user_agent?.startsWith('pnpm')){console.error('ERROR: This project requires pnpm. Please install dependencies using: pnpm install');process.exit(1)}\"",
     "start": "node run.js",
     "test": "node --test",
     "lint": "eslint .",
