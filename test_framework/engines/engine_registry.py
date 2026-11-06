@@ -84,3 +84,13 @@ EngineRegistry.register(TestType.UI_AUTOMATION, {
     "version": "1.0.0",
     "config_schema": "config/defaults/web.yaml",
 })
+
+# Agent 行为测试引擎元数据占位。实现将在 Phase A 以薄壳 BaseEngine 形式建于
+# engines/agent_behavior/，本行先接上枚举↔注册↔配置的链。
+# config_schema 文件路径为预占，Phase A 落 config/defaults/agent.yaml 后自动生效。
+EngineRegistry.register(TestType.AGENT_BEHAVIOR, {
+    "name": "Agent 行为测试引擎",
+    "description": "基于 pytest 的 Agent/LLM 行为级测试薄壳引擎，通过 subprocess 委托 pytest 执行 SSE 流式测试、LLM-as-Judge 评分与 DeepEval 混合评测",
+    "version": "0.0.0",
+    "config_schema": "config/defaults/agent.yaml",
+})

@@ -201,11 +201,17 @@ class BaseEngine(ABC):
         Returns:
             测试报告。
         """
-        return TestReport.from_results(
-            plan_name=plan.name,
+        # 使用 TestReport.from_results 的真实签名 (report_id, plan_id, results)，
+        # metrics 作为独立字段随后赋值（from_results 不接收 metrics 参数）。
+        # 旧的错误调用 plan_name=… metrics=… 会抛 TypeError，使任何 BaseEngine 子类
+        # （包括 Phase A 即将建的 AgentBehaviorEngine）无法生成报告。
+        report = TestReport.from_results(
+            report_id=f"{plan.id}-{datetime.now().strftime('%Y%m%d%H%M%S')}",
+            plan_id=plan.id,
             results=self._results,
-            metrics=metrics,
         )
+        report.metrics = metrics
+        return report
 
     async def _publish_event(self, event_type: str, data: Dict[str, Any]) -> None:
         """

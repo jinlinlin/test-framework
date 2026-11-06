@@ -1,8 +1,13 @@
 """
-测试指标模型 — 定义性能测试中采集到的量化指标。
+测试指标模型 — 定义一次测试运行的量化指标。
 
-TestMetrics 主要用于性能类测试引擎（网页性能、后端性能、数据库性能），
-包含延迟百分位、吞吐量、错误率、资源使用率等标准指标。
+覆盖两类指标：
+    - 性能指标（throughput/latency_*/error_rate/cpu_usage/memory_usage），
+      主要用于网页性能、后端性能、数据库性能等性能类引擎。
+    - 用例统计指标（total_cases/passed_cases/failed_cases/skipped_cases/
+      errored_cases/duration），所有引擎通用，含 Agent、REST API、UI 自动化等。
+
+保留原有性能字段，新增的用例统计字段均带默认值，向后兼容。
 """
 from __future__ import annotations
 
@@ -28,6 +33,12 @@ class TestMetrics:
         cpu_usage: CPU 使用率百分比（可选）。
         memory_usage: 内存使用率百分比（可选）。
         custom: 自定义指标字典（如 Web Vitals、JVM 堆内存等）。
+        total_cases: 本次运行的用例总数（所有引擎通用）。
+        passed_cases: 通过的用例数（TestStatus.PASS）。
+        failed_cases: 失败的用例数（TestStatus.FAIL）。
+        skipped_cases: 跳过的用例数（TestStatus.SKIP）。
+        errored_cases: 错误的用例数（TestStatus.ERROR，非断言失败）。
+        duration: 本次运行总耗时（秒）。
     """
 
     throughput: float = 0.0
@@ -39,6 +50,15 @@ class TestMetrics:
     cpu_usage: Optional[float] = None
     memory_usage: Optional[float] = None
     custom: Dict[str, Any] = field(default_factory=dict)
+
+    # ── 用例统计字段（所有引擎通用，包括 Agent 行为测试）──
+    # 均带默认值，旧的纯性能构造（如 TestMetrics(throughput=100)）仍可运行。
+    total_cases: int = 0
+    passed_cases: int = 0
+    failed_cases: int = 0
+    skipped_cases: int = 0
+    errored_cases: int = 0
+    duration: float = 0.0
 
     def set_custom_metric(self, name: str, value: float) -> None:
         """
@@ -64,7 +84,11 @@ class TestMetrics:
         return self.custom.get(name, default)
 
     def to_dict(self) -> Dict[str, Any]:
-        """将指标序列化为字典。"""
+        """将指标序列化为字典。
+
+        旧行为保留：性能字段始终写入；cpu/memory/custom 非空才写。
+        用例统计字段仅在任一非零时写入，避免污染纯性能场景的输出。
+        """
         result = {
             "throughput": self.throughput,
             "latency_avg": self.latency_avg,
@@ -79,4 +103,13 @@ class TestMetrics:
             result["memory_usage"] = self.memory_usage
         if self.custom:
             result["custom"] = self.custom
+        # 用例统计字段按需写入：任一计数或 duration 非零即写入全组。
+        if (self.total_cases or self.passed_cases or self.failed_cases
+                or self.skipped_cases or self.errored_cases or self.duration):
+            result["total_cases"] = self.total_cases
+            result["passed_cases"] = self.passed_cases
+            result["failed_cases"] = self.failed_cases
+            result["skipped_cases"] = self.skipped_cases
+            result["errored_cases"] = self.errored_cases
+            result["duration"] = self.duration
         return result
