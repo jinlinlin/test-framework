@@ -10,11 +10,12 @@ from unittest.mock import MagicMock, AsyncMock
 class TestRestApiEngine:
     """测试 REST API 测试引擎。"""
 
-    def test_engine_creation(self):
+    def test_engine_creation(self, minimal_config, mock_container):
         """测试引擎实例化。"""
-        from test_framework.engines.rest_api.engine import RestApiEngine
+        from test_framework.engines.rest_api.engine import RestAPIEngine
 
-        engine = RestApiEngine()
+        # 引擎构造契约为 (config, container)，依赖注入不可无参
+        engine = RestAPIEngine(config=minimal_config, container=mock_container)
         assert engine is not None
         assert engine.engine_type == "rest_api"
 

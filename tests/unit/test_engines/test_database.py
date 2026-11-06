@@ -10,11 +10,12 @@ from unittest.mock import MagicMock, AsyncMock
 class TestDatabaseEngine:
     """测试数据库测试引擎。"""
 
-    def test_engine_creation(self):
+    def test_engine_creation(self, minimal_config, mock_container):
         """测试引擎实例化。"""
         from test_framework.engines.database.engine import DatabaseEngine
 
-        engine = DatabaseEngine()
+        # 引擎构造契约为 (config, container)，依赖注入不可无参
+        engine = DatabaseEngine(config=minimal_config, container=mock_container)
         assert engine is not None
         assert engine.engine_type == "database"
 

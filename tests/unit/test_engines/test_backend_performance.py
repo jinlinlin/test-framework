@@ -10,13 +10,14 @@ from unittest.mock import MagicMock, patch
 class TestBackendPerformanceEngine:
     """测试后端性能测试引擎。"""
 
-    def test_engine_creation(self):
+    def test_engine_creation(self, minimal_config, mock_container):
         """测试引擎实例化。"""
         from test_framework.engines.backend_performance.engine import (
             BackendPerformanceEngine,
         )
 
-        engine = BackendPerformanceEngine()
+        # 引擎构造契约为 (config, container)，依赖注入不可无参
+        engine = BackendPerformanceEngine(config=minimal_config, container=mock_container)
         assert engine is not None
         assert engine.engine_type == "backend_performance"
 

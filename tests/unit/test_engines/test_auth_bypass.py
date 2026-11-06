@@ -10,11 +10,12 @@ from unittest.mock import MagicMock
 class TestAuthBypassEngine:
     """测试越权访问测试引擎。"""
 
-    def test_engine_creation(self):
+    def test_engine_creation(self, minimal_config, mock_container):
         """测试引擎实例化。"""
         from test_framework.engines.auth_bypass.engine import AuthBypassEngine
 
-        engine = AuthBypassEngine()
+        # 引擎构造契约为 (config, container)，依赖注入不可无参
+        engine = AuthBypassEngine(config=minimal_config, container=mock_container)
         assert engine is not None
         assert engine.engine_type == "auth_bypass"
 

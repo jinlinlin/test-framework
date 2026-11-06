@@ -11,11 +11,12 @@ import asyncio
 class TestWebPerformanceEngine:
     """测试 Web 性能测试引擎。"""
 
-    def test_engine_creation(self):
+    def test_engine_creation(self, minimal_config, mock_container):
         """测试引擎实例化。"""
         from test_framework.engines.web_performance.engine import WebPerformanceEngine
 
-        engine = WebPerformanceEngine()
+        # 引擎构造契约为 (config, container)，依赖注入不可无参
+        engine = WebPerformanceEngine(config=minimal_config, container=mock_container)
         assert engine is not None
         assert engine.engine_type == "web_performance"
 

@@ -10,11 +10,12 @@ from unittest.mock import MagicMock
 class TestKnowledgeQAEngine:
     """测试知识库问答引擎。"""
 
-    def test_engine_creation(self):
+    def test_engine_creation(self, minimal_config, mock_container):
         """测试引擎实例化。"""
         from test_framework.engines.knowledge_qa.engine import KnowledgeQAEngine
 
-        engine = KnowledgeQAEngine()
+        # 引擎构造契约为 (config, container)，依赖注入不可无参
+        engine = KnowledgeQAEngine(config=minimal_config, container=mock_container)
         assert engine is not None
         assert engine.engine_type == "knowledge_qa"
 
