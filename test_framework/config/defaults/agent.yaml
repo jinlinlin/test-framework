@@ -1,0 +1,44 @@
+# ============================================================
+# Agent 行为测试引擎 — 默认配置
+# ============================================================
+# 薄壳引擎定位：自身不执行用例，通过 subprocess 委托 pytest 运行
+# test-cases/agent/ 下的行为用例，结果收口为框架 TestResult 并
+# 输出 Layer 2 契约产物 artifacts/agent_behavior/{run_id}/summary.json。
+# 凭证类配置（TOKEN/LOGIN_*）一律走环境变量 / config 环境层，
+# 本文件不得出现任何机密。
+
+agent_behavior:
+  # 执行器
+  executor: pytest               # 执行内核（pytest 原生机制，不做 EventBus 重写）
+  cases_dir: test-cases/agent    # 业务用例目录（仓库根相对路径）
+  data_dir: test-data            # 跨引擎共享测试数据目录
+
+  # pytest 委托参数
+  pytest:
+    timeout: 1800                # 单次 pytest 运行超时（秒），SSE 流式用例耗时较长
+    markers: []                  # 限定 marker 表达式（如 "rag"），空为全量
+    extra_args: []               # 追加 pytest CLI 参数
+    use_xdist: false             # 是否并行（pytest-xdist）
+
+  # 评分制判定（TestResult.score 归一化为 0~1）
+  scoring:
+    default_threshold: 0.75      # 用例级默认通过阈值（归一化后）
+    use_deepeval: true           # DeepEval 优先，异常回退自建 Judge
+    dimensions:                  # 维度 -> 后端路由（deepeval / judge）
+      relevance: deepeval
+      faithfulness: deepeval
+      data_accuracy: deepeval
+      completeness: deepeval
+      depth: judge
+      key_concepts: judge
+      format: judge
+      instruction_follow: judge
+
+  # 产物（Layer 1 原生 + Layer 2 契约）
+  artifacts:
+    base_dir: artifacts/agent_behavior  # Layer 1 原生产物根（junit/allure-results/judge.json 等）
+    summary: true                # Layer 2 summary.json 开关（经 JSONReporter 产出）
+
+  # 可观测性（机密走环境变量，此处仅开关）
+  observability:
+    langfuse_enabled: false      # Trace 上报开关（密钥见环境变量 LANGFUSE_*）

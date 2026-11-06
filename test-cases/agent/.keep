@@ -1,0 +1,8 @@
+# Agent 行为测试用例目录（业务用例，与框架自测 tests/ 分离）
+#
+# 结构约定（与 test_framework/engines/agent_behavior/ 薄壳引擎一一镜像）：
+#   conftest.py / pytest.ini   pytest 全局夹具与配置（自 agent-test 迁入）
+#   <模块子目录>/               按被测能力分组的行为用例（rag_chat 等）
+#   requirements.txt            用例专属依赖（deepeval/langfuse/pypdf 等）
+#
+# 本目录不参与 pip 打包（位于 Python 包 test_framework/ 之外）。

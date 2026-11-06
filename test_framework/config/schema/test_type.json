@@ -28,6 +28,9 @@
         },
         "auth_bypass": {
           "$ref": "#/definitions/auth_bypass_config"
+        },
+        "agent_behavior": {
+          "$ref": "#/definitions/agent_behavior_config"
         }
       }
     }
@@ -221,6 +224,54 @@
         "detection_sensitivity": {
           "type": "string",
           "enum": ["low", "medium", "high"]
+        }
+      }
+    },
+    "agent_behavior_config": {
+      "type": "object",
+      "description": "Agent 行为测试引擎配置（薄壳委托 pytest 执行）",
+      "properties": {
+        "executor": {
+          "type": "string",
+          "enum": ["pytest"]
+        },
+        "cases_dir": { "type": "string" },
+        "data_dir": { "type": "string" },
+        "pytest": {
+          "type": "object",
+          "properties": {
+            "timeout": { "type": "integer", "minimum": 1 },
+            "markers": { "type": "array", "items": { "type": "string" } },
+            "extra_args": { "type": "array", "items": { "type": "string" } },
+            "use_xdist": { "type": "boolean" }
+          }
+        },
+        "scoring": {
+          "type": "object",
+          "properties": {
+            "default_threshold": { "type": "number", "minimum": 0, "maximum": 1 },
+            "use_deepeval": { "type": "boolean" },
+            "dimensions": {
+              "type": "object",
+              "additionalProperties": {
+                "type": "string",
+                "enum": ["deepeval", "judge"]
+              }
+            }
+          }
+        },
+        "artifacts": {
+          "type": "object",
+          "properties": {
+            "base_dir": { "type": "string" },
+            "summary": { "type": "boolean" }
+          }
+        },
+        "observability": {
+          "type": "object",
+          "properties": {
+            "langfuse_enabled": { "type": "boolean" }
+          }
         }
       }
     }

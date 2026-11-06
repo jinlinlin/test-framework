@@ -47,7 +47,7 @@ class TestType(str, Enum):
     UI_AUTOMATION = "ui_automation"
 
     # ⑨ Agent 行为测试（SSE 流式 + LLM-as-Judge + DeepEval 混合评分）
-    # 实现引擎将在 Phase A 以薄壳 BaseEngine 形式建于 engines/agent_behavior/，
+    # 实现为 engines/agent_behavior/ 的薄壳引擎（subprocess 委托 pytest），
     # 本枚举项为框架侧接入点，支持配置路由与引擎工厂分发。
     AGENT_BEHAVIOR = "agent_behavior"
 

@@ -89,11 +89,17 @@ class JSONReporter(BaseReporter):
         resolved_run_id = run_id or self._run_id
 
         # 构建报告结构
+        # 状态词表兼容两套取值：引擎链路产出 TestStatus 枚举值
+        # （pass/fail/skip/error），历史调用方可能传入过去式形态
+        # （passed/failed/skipped），两种都计入同一计数，避免 totals 静默归零。
+        def _count(*statuses: str) -> int:
+            return sum(1 for r in results if r.get("status") in statuses)
+
         total = len(results)
-        passed = sum(1 for r in results if r.get("status") == "passed")
-        failed = sum(1 for r in results if r.get("status") == "failed")
-        errors = sum(1 for r in results if r.get("status") == "error")
-        skipped = sum(1 for r in results if r.get("status") == "skipped")
+        passed = _count("pass", "passed")
+        failed = _count("fail", "failed")
+        errors = _count("error")
+        skipped = _count("skip", "skipped")
         total_duration = sum(r.get("duration", 0) for r in results)
 
         summary = {
@@ -148,7 +154,7 @@ class JSONReporter(BaseReporter):
                         "message": r.get("message", ""),
                     }
                     for r in results
-                    if r.get("status") in ("failed", "error")
+                    if r.get("status") in ("fail", "failed", "error")
                 ],
             }
             summary_path = os.path.join(artifact_dir, "summary.json")

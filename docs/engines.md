@@ -236,6 +236,47 @@ test:
 
 ---
 
+## 8. Agent 行为测试引擎
+
+**目录**：`engines/agent_behavior/`（薄壳引擎已落地：subprocess 委托 pytest + junit 收口 + Layer 2 产物）
+
+### 核心能力
+
+- 薄壳模式：自身不执行用例，通过 subprocess 委托 **pytest** 运行 `test-cases/agent/` 下的行为用例（保留 conftest fixture 原生机制）
+- SSE 流式响应测试（断流恢复、首包耗时、chunk 拼接）
+- 评分制结果：LLM-as-Judge + DeepEval 混合评估，收口为 `TestResult.score/dimensions/threshold`（0~1 归一化，`passed_by_score` 判定）
+- 产物契约：Layer 1 原生产物落 `artifacts/agent_behavior/{run_id}/`，Layer 2 经 JSONReporter 输出统一 `summary.json`
+- 可选 Langfuse Trace 上报（开关在配置，密钥走环境变量）
+
+### 目录约定
+
+| 路径 | 职责 |
+|------|------|
+| `test-cases/agent/` | 业务用例（conftest.py / pytest.ini / 用例子目录），与框架自测 `tests/` 分离，不参与 pip 打包 |
+| `test-data/` | 跨引擎共享测试数据（Golden Dataset / PDF 等） |
+| `artifacts/agent_behavior/{run_id}/` | 单次运行产物（junit.xml / allure-results / judge.json / summary.json） |
+
+### 配置示例
+
+```yaml
+agent_behavior:
+  executor: pytest               # 执行内核
+  cases_dir: test-cases/agent
+  pytest:
+    timeout: 1800                # SSE 流式用例耗时较长
+    markers: ["rag"]             # 只跑 rag 标记用例
+  scoring:
+    default_threshold: 0.75
+    use_deepeval: true           # DeepEval 优先，异常回退自建 Judge
+    dimensions:
+      relevance: deepeval
+      depth: judge
+```
+
+完整默认值见 `config/defaults/agent.yaml`，校验规则见 `config/schema/test_type.json` 的 `agent_behavior_config`。
+
+---
+
 ## 自定义引擎
 
 继承 `BaseEngine` 实现自定义引擎：

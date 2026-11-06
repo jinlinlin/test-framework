@@ -127,5 +127,11 @@ def _auto_register() -> None:
     except ImportError:
         pass
 
+    try:
+        from .agent_behavior.engine import AgentBehaviorEngine
+        EngineFactory.register(TestType.AGENT_BEHAVIOR, AgentBehaviorEngine)
+    except ImportError:
+        pass
+
 
 _auto_register()
