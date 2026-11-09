@@ -250,7 +250,8 @@ test:
   双轨语义：status 由 pytest 断言决定，`passed_by_score` 为报告元数据）。DeepEval 路由已
   落地（`test-cases/agent/core/evaluators/`：dimension_registry 声明表 + evaluation_orchestrator
   按表分发，第三方指标优先、失败显式回退 Judge）；Langfuse 上报尚未接入（见下节遗留）
-- 产物契约：Layer 1 原生产物落 `artifacts/agent_behavior/{run_id}/`，Layer 2 经 JSONReporter 输出统一 `summary.json`
+- 产物契约：Layer 1 原生产物落 `artifacts/agent_behavior/{run_id}/`，Layer 2 经 JSONReporter 输出统一 `summary.json`；
+  Layer 3 跨引擎聚合器（`reporters/aggregator/`）已消费 summary.json 产出 `artifacts/aggregate/{id}/aggregate.json`
 - 可选 Langfuse Trace 上报（开关在配置，密钥走环境变量）
 
 ### 目录约定
