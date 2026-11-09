@@ -32,7 +32,8 @@ nodejs_modules/node_modules/
 # ---------- 日志与输出 ----------
 logs/*.log
 logs/execution/
-reports/*.html
+reports/*
+!reports/.keep
 results/*.json
 artifacts/*
 !artifacts/.keep

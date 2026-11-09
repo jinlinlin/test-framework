@@ -1,0 +1,56 @@
+# =============================================================================
+# agent-test 环境配置（单一事实来源）
+# =============================================================================
+# 切换环境：修改 config/.env 中的 TEST_ENV 值（dev/test/pre/prod）
+# 或运行时设置环境变量：$env:TEST_ENV="prod"
+#
+# 敏感信息（TOKEN、LOGIN_PASSWORD 等）仍放在 config/.env 中，不入库
+# =============================================================================
+
+# 环境标识（默认 prod）
+# - dev:  开发环境
+# - test: 测试环境（联调测试机）
+# - pre:  预发布环境
+# - prod: 生产环境（线上）
+default_env: "${TEST_ENV:-prod}"
+
+environments:
+  # 开发环境
+  dev:
+    base_url: "http://192.168.2.52:5890"
+    description: "开发环境（本地部署）"
+
+  # 测试环境
+  test:
+    base_url: "http://192.168.2.136:31012"
+    description: "测试环境（联调测试机）"
+
+  # 预发布环境
+  pre:
+    base_url: "https://pre-uniresearch.uniplore.com/restapi"
+    description: "预发布环境（上线前验证）"
+
+  # 生产环境
+  prod:
+    base_url: "https://uniresearch.uniplore.com/restapi"
+    description: "生产环境（线上）"
+
+# =============================================================================
+# 使用说明
+# =============================================================================
+#
+# 方法 1：修改 config/.env（推荐）
+#   TEST_ENV=pre    # 切换到预发布
+#   TEST_ENV=prod   # 切换到线上
+#
+# 方法 2：运行时环境变量（临时切换）
+#   PowerShell: $env:TEST_ENV="pre"; python -m pytest ...
+#   CMD:        set TEST_ENV=pre && python -m pytest ...
+#
+# 方法 3：用例/脚本内运行时切换
+#   from core.utils.config import config; config.switch_env("pre")
+#
+# 优先级：环境变量 TEST_ENV > config/.env 的 TEST_ENV > environments.yaml 默认值
+# （注：本项目未定义用于切换环境的 pytest 命令行参数，conftest.py 里无任何 addoption）
+#
+# =============================================================================
