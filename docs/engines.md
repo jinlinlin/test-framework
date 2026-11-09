@@ -244,7 +244,11 @@ test:
 
 - 薄壳模式：自身不执行用例，通过 subprocess 委托 **pytest** 运行 `test-cases/agent/` 下的行为用例（保留 conftest fixture 原生机制）
 - SSE 流式响应测试（断流恢复、首包耗时、chunk 拼接）
-- 评分制结果：LLM-as-Judge + DeepEval 混合评估，收口为 `TestResult.score/dimensions/threshold`（0~1 归一化，`passed_by_score` 判定）
+- 评分制结果：自建 Judge 已接入（`test-cases/agent/core/clients/judge_client.py`）；收口契约为用例侧
+  `score_sink` 夹具写 junit `<properties>` 的 `score/threshold/dimensions`，引擎解析为
+  `TestResult.score/dimensions/threshold`（score 为 0~1 归一比，与 `default_threshold` 同标度；
+  双轨语义：status 由 pytest 断言决定，`passed_by_score` 为报告元数据）。DeepEval 路由与
+  Langfuse 上报尚未接入（见下节遗留）
 - 产物契约：Layer 1 原生产物落 `artifacts/agent_behavior/{run_id}/`，Layer 2 经 JSONReporter 输出统一 `summary.json`
 - 可选 Langfuse Trace 上报（开关在配置，密钥走环境变量）
 
@@ -274,6 +278,14 @@ agent_behavior:
 ```
 
 完整默认值见 `config/defaults/agent.yaml`，校验规则见 `config/schema/test_type.json` 的 `agent_behavior_config`。
+
+### 当前状态与遗留（Phase A）
+
+- 已落地：离线 SSE 请求契约用例 12 条 + 评分收口链契约用例 4 条（均带 `offline` 标记，
+  本地假网关/假裁判，零凭证零网络），经引擎 subprocess 委托全链路验证
+- 待接入：rag/paper 真实环境用例（需 `config/.env` 凭证）、token 登录链与 Langfuse 钩子
+  （回补清单见 `test-cases/agent/conftest.py` 文件头）、dimension_registry/evaluation_orchestrator
+  配置驱动路由、跨引擎统一环境配置（归 M1，见迁移文档裁决记录）
 
 ---
 
