@@ -83,7 +83,8 @@ class TestSingleRound:
     """文献解读 - 单轮 Agent 行为测试（INT-001~INT-003）。"""
 
     def test_paper_interpret_agent_trace(
-        self, sse_client: SseClient, output_dir: Path, pdf_path: str, model_name: str
+        self, sse_client: SseClient, output_dir: Path, pdf_path: str, model_name: str,
+        score_sink,
     ) -> None:
         """
         INT-001 [P0]：首次提问上传PDF，验证文件上传+LLM调用+输出文档+Judge评分。
@@ -617,6 +618,10 @@ class TestSingleRound:
                     )
                 else:
                     avg = judge_result.get("average", 0)
+                    # 评分收口：写 junit properties 供引擎取主观分（双轨语义：
+                    # 只影响 passed_by_score 元数据，不改变 status 断言轨）；
+                    # 超时/失败路径不写——score 缺省保持合法的 None
+                    score_sink(judge_result)
                     if config.use_deepeval:
                         tool_accuracy = judge_result.get("tool_call_accuracy", 0)
                         reporter.check(
@@ -701,7 +706,8 @@ class TestSingleRound:
 
 
     def test_paper_interpret_follow_up(
-        self, sse_client: SseClient, output_dir: Path, pdf_path: str, model_name: str
+        self, sse_client: SseClient, output_dir: Path, pdf_path: str, model_name: str,
+        score_sink,
     ) -> None:
         """
         INT-002 [P0]：追问不传文件，验证上下文继承+文档编辑/复用。
@@ -715,10 +721,12 @@ class TestSingleRound:
         _run_follow_up_scenario(
             sse_client, output_dir, model_name,
             _FOLLOW_UP_SCENARIOS["reuse"], pdf_path=pdf_path,
+            score_sink=score_sink,
         )
 
     def test_paper_interpret_follow_up_new_file(
-        self, sse_client: SseClient, output_dir: Path, pdf_path: str, pdf_path_2: str, model_name: str
+        self, sse_client: SseClient, output_dir: Path, pdf_path: str, pdf_path_2: str, model_name: str,
+        score_sink,
     ) -> None:
         """
         INT-003 [P1]：追问上传新PDF，验证跨文件切换能力。
@@ -732,6 +740,7 @@ class TestSingleRound:
         _run_follow_up_scenario(
             sse_client, output_dir, model_name,
             _FOLLOW_UP_SCENARIOS["new_file"], pdf_path=pdf_path, pdf_path_2=pdf_path_2,
+            score_sink=score_sink,
         )
 
 
@@ -803,6 +812,7 @@ def _run_follow_up_scenario(
     scenario: Dict[str, Any],
     pdf_path: str,
     pdf_path_2: str = "",
+    score_sink=None,
 ) -> None:
     """INT-002/003 共用执行体：首次提问 + 追问（复用文件 / 上传新文件）单轮行为验证。
 
@@ -1135,6 +1145,10 @@ def _run_follow_up_scenario(
             reporter.info("Judge 质量评分", judge_error_msg)
         elif judge_result_2 is not None:
             avg_2 = judge_result_2.get("average", 0)
+            # 评分收口：追问轮（末轮）为代表分——每用例仅 sink 一次，
+            # 避免同名 properties 重复追加破坏引擎侧单值解析契约
+            if score_sink is not None:
+                score_sink(judge_result_2)
             claims_2 = judge_result_2.get("_claims_detail", [])
             supported_2 = sum(1 for c in claims_2 if c.get("verdict") == "supported")
             claims_desc_2 = f"声明验证={supported_2}/{len(claims_2)} 支持" if claims_2 else "无声明"

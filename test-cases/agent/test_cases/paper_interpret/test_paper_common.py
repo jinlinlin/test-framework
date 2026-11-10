@@ -397,14 +397,27 @@ def _run_judge_async(
     def _runner() -> None:
         try:
             if use_deepeval:
-                adapter = DeepEvalAdapter()
-                _judge_out["result"] = adapter.evaluate_quality(
+                # 混合路由改走 orchestrator：deepeval 四维走第三方真指标、
+                # judge 四维走真 Judge 单次调用——切除 adapter 把 judge 四维
+                # 写死 3.5/4.0 常数的占位缺陷（框架侧 evaluation_orchestrator
+                # 设计本意；tool_calls/expected_tools/n_runs 原样透传 adapter，
+                # tool_call_accuracy 等扩展维由收口逻辑如实保留）。
+                from core.evaluators.evaluation_orchestrator import EvaluationOrchestrator
+                orch = EvaluationOrchestrator(
+                    judge_client=JudgeClient(),
+                    deepeval_adapter=DeepEvalAdapter(),
+                    use_deepeval=True,
+                )
+                _judge_out["result"] = orch.evaluate(
                     question=question,
                     answer=judge_content,
                     reference=paper_reference,
-                    tool_calls=tool_calls,
-                    expected_tools=expected_tools,
-                    n_runs=sample_count,
+                    expected_points=expected_points,
+                    deepeval_kwargs={
+                        "tool_calls": tool_calls,
+                        "expected_tools": expected_tools,
+                        "n_runs": sample_count,
+                    },
                 )
                 return
             judge_client = JudgeClient()

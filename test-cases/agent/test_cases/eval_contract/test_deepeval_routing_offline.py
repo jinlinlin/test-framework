@@ -50,15 +50,20 @@ class RecordingJudge:
 
 
 class FakeDeepEval:
-    """假 DeepEval adapter：按 mode 返回分数 / None（重试耗尽）/ 抛异常。"""
+    """假 DeepEval adapter：按 mode 返回分数 / None（重试耗尽）/ 抛异常。
+
+    额外关键字参数（tool_calls 等）记录到 last_kwargs 供透传契约断言。
+    """
 
     def __init__(self, mode="ok", scores=None):
         self.mode = mode
         self.scores = dict(scores or DEEPEVAL_OUTPUT)
         self.calls = 0
+        self.last_kwargs = None  # 最近一次透传的额外关键字参数
 
-    def evaluate_quality(self, question, answer, reference=""):
+    def evaluate_quality(self, question, answer, reference="", **kwargs):
         self.calls += 1
+        self.last_kwargs = kwargs
         if self.mode == "none":
             return None
         if self.mode == "raise":
@@ -120,6 +125,19 @@ class TestHybridRouting:
         ).evaluate("q", "a")
         assert result["_evaluation_backend"]["relevance"] == "judge"  # 整体回退
         assert "_deepeval_fallback" in result  # 回退必须显式标注，不静默
+
+    def test_deepeval_kwargs_passthrough(self):
+        # 用例直连路径（test_paper_common deepeval 形态）依赖 tool_calls/n_runs
+        # 透传 adapter：编排器不解释含义，原样转发
+        judge, deepeval = RecordingJudge(), FakeDeepEval()
+        EvaluationOrchestrator(
+            judge_client=judge, deepeval_adapter=deepeval, use_deepeval=True
+        ).evaluate("q", "a", deepeval_kwargs={
+            "tool_calls": [{"name": "read"}], "expected_tools": ["read", "write"], "n_runs": 3,
+        })
+        assert deepeval.last_kwargs == {
+            "tool_calls": [{"name": "read"}], "expected_tools": ["read", "write"], "n_runs": 3,
+        }
 
 
 class TestRegistryConfig:

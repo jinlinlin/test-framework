@@ -83,8 +83,14 @@ class EvaluationOrchestrator:
         answer: str,
         reference: str = "",
         expected_points: Optional[List[str]] = None,
+        deepeval_kwargs: Optional[Dict[str, Any]] = None,
     ) -> Dict[str, Any]:
         """按路由表评估并合并为 judge_result 形态（5 分制平铺 dict）。
+
+        Args:
+            deepeval_kwargs: 透传给 adapter.evaluate_quality 的额外关键字参数
+                （如 tool_calls/expected_tools/n_runs）；本编排不解释其含义，
+                缺维时由路由分发逻辑自然回退（无该维产出 → 不参与 deepeval 维优先）。
 
         Returns:
             合并结果 dict：维度分数 + 非下划线键（average）+ 元数据
@@ -111,7 +117,8 @@ class EvaluationOrchestrator:
         if self._use_deepeval:
             try:
                 raw = self._deepeval.evaluate_quality(
-                    question=question, answer=answer, reference=reference
+                    question=question, answer=answer, reference=reference,
+                    **(deepeval_kwargs or {}),
                 )
                 if raw is None:  # adapter 重试耗尽的显式失败语义
                     deepeval_failed = True
