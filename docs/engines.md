@@ -288,10 +288,18 @@ agent_behavior:
   经引擎 subprocess 委托全链路验证
 - 已落地：dimension_registry/evaluation_orchestrator 配置驱动路由（用例侧默认表与
   `scoring.dimensions` 同构；编排结果直接喂 score_sink，收口链零改造兼容）
-- 待接入：rag/paper 真实环境用例（需 `config/.env` 凭证，真实 DeepEvalAdapter 接线验证
-  同批）、框架 `scoring.use_deepeval` → 用例侧的传递接线（当前用 USE_DEEPEVAL 环境变量
-  或缺省构造传参）、token 登录链与 Langfuse 钩子
-  （回补清单见 `test-cases/agent/conftest.py` 文件头）、跨引擎统一环境配置（归 M1，见迁移文档裁决记录）
+- 已落地：真实环境用例接入（paper_interpret 单轮批 + robust，共 3 条带网络用例）——
+  pre 环境直跑 pytest 与引擎委托双路径均实证通过（INT-001 经 AgentBehaviorEngine
+  委托 PASS，score=None 属双轨语义合法值：真实用例尚未接 score_sink 收口）；
+  token 登录链（复用 → REFRESH_TOKEN 续期两级回退）与 Langfuse Trace 钩子已回补，
+  真实 DeepEvalAdapter 接线验证通过（含失败重试与翻译回退语义）
+- 待接入：真实用例评分收口（test_paper_common 直连 Judge/DeepEval 路径尚未改走
+  orchestrator + score_sink，引擎侧因此拿不到主观分）、框架 `scoring.use_deepeval` →
+  用例侧的传递接线（当前用 USE_DEEPEVAL 环境变量或缺省构造传参）、
+  Langfuse SDK 4.x `trace()` 入口适配（探测后自动禁用，优雅降级不阻塞用例）、
+  跨引擎统一环境配置（归 M1，见迁移文档裁决记录）
+- 声明：浏览器滑块登录（browser_login）刻意不随迁，连带 peer_token 跨账号用例
+  在当前环境恒为 skip（见 `test-cases/agent/conftest.py` 文件头）
 
 ---
 

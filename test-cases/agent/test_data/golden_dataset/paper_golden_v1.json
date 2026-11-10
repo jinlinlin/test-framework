@@ -1,0 +1,281 @@
+[
+  {
+    "id": "paper-ofoldna-001",
+    "question": "请总结这篇论文的核心贡献、方法与结论",
+    "expected_points": [
+      "提出 OFoldNA，一个统一的全原子扩散模型（all-atom diffusion model），用于核酸单链折叠和蛋白质-核酸共折叠",
+      "OFoldNA 通过专用的 SS embedding 模块将二级结构（secondary structure）信息嵌入到 pair representation 中",
+      "在 FoldBench 基准上，OFoldNA 在核酸单链折叠和蛋白质-核酸共折叠两项任务中均取得领先性能",
+      "在 DNA 单体上表现尤为突出：TM-score 达到 0.329，比 AlphaFold 3 高约 35%",
+      "OFoldNA-SS2TS 在提供精确碱基配对信息时可进一步提升折叠和共折叠精度",
+      "辅助预测分支 OFoldNA-SS 作为独立的二级结构预测器，在 CHANRG 数据集上取得了最佳的分布外泛化性能"
+    ],
+    "dataset_id": "0",
+    "pdf_path": "test_data/pdfs/Leveraging secondary‑structure information for accurate nucleic acid structure prediction with OFoldNA.pdf"
+  },
+  {
+    "id": "paper-ofoldna-002",
+    "question": "OFoldNA 在 DNA 和 RNA 单体预测上的具体数值表现如何？与基线方法相比有什么优势？",
+    "expected_points": [
+      "DNA 单体：OFoldNA 的 TM-score 为 0.329，比 AlphaFold 3（0.243）高约 35%",
+      "DNA 单体：OFoldNA 的 lDDT 为 0.560，比 Protenix-v1（0.464）提高 20.9%",
+      "DNA 单体：OFoldNA 的 INF-all 为 0.688，INF-nWC 为 0.539，分别比 Boltz-1 高 11.2% 和 21.6%",
+      "RNA 单体：OFoldNA 在无外部 SS 信息方法中 TM-score 最高（0.404）",
+      "在无外部 SS 信息的 16 项 DNA 和 RNA 指标比较中，OFoldNA 在 12 项排名第一",
+      "提供 SS 信息后（OFoldNA-SS2TS），DNA 的 TM-score 提升 19.6%，lDDT 提升 8.0%，INF-all 提升 10.1%"
+    ],
+    "dataset_id": "0",
+    "pdf_path": "test_data/pdfs/Leveraging secondary‑structure information for accurate nucleic acid structure prediction with OFoldNA.pdf"
+  },
+  {
+    "id": "paper-ofoldna-003",
+    "question": "OFoldNA 在蛋白质-核酸共折叠任务上的表现如何？特别是在长链核酸上的优势？",
+    "expected_points": [
+      "蛋白质-DNA 接口：OFoldNA 取得最高 DockQ（0.604）、最低 iRMSD（4.12Å）和 lRMSD（9.95Å）、最高 lDDT（0.851）",
+      "蛋白质-RNA 接口：OFoldNA 取得最高 DockQ（0.400）和最低 lRMSD（16.45Å）",
+      "在含至少 20 个核苷酸的长链蛋白质-DNA 子集上，OFoldNA 的 DockQ 为 0.286，比 AlphaFold 3（0.238）高 20.2%，比 Protenix-v1（0.215）高 33.1%",
+      "OFoldNA 在该子集上成功率达 44.8%，比 AlphaFold 3 高 6.9 个百分点",
+      "提供 SS 信息后（OFoldNA-SS2TS），蛋白质-DNA 接口的 DockQ 提升 22.9%，lRMSD 降低 27.1%",
+      "性能随核酸链长度增加而下降，短链上现有方法已较准确"
+    ],
+    "dataset_id": "0",
+    "pdf_path": "test_data/pdfs/Leveraging secondary‑structure information for accurate nucleic acid structure prediction with OFoldNA.pdf"
+  },
+  {
+    "id": "paper-ofoldna-004",
+    "question": "OFoldNA 成功恢复了哪些具有挑战性的核酸折叠结构？具体数值是多少？",
+    "expected_points": [
+      "NRAS G-四联体（PDB ID: 7SXP，22 核苷酸）：OFoldNA 达到 TM-score 0.394、lDDT 0.750，成功重建所有非 Watson-Crick 碱基对和堆叠相互作用",
+      "平行 DNA G-四联体（PDB ID: 8D78）：OFoldNA 重建所有 4 个 G-tetrads 和非 WC 碱基对，TM-score 0.524，lDDT 0.843",
+      "ALOG 结构域-DNA 复合物（PDB ID: 8P5Q）：OFoldNA 达到 DockQ 0.517、iRMSD 2.34Å，正确恢复结合方向和链特异性接触",
+      "Lettuce 荧光 DNA 适配体（PDB ID: 8FI1，53 核苷酸）：OFoldNA-SS2TS 达到 TM-score 0.481、RMSD 2.975Å，标准设置下所有方法 TM-score 均低于 0.26",
+      "IS621 突触复合物（PDB ID: 8WT6）：OFoldNA-SS2TS 恢复所有 4 个蛋白质-DNA 接口，DockQ 0.705，而 AlphaFold 3 仅 0.100"
+    ],
+    "dataset_id": "0",
+    "pdf_path": "test_data/pdfs/Leveraging secondary‑structure information for accurate nucleic acid structure prediction with OFoldNA.pdf"
+  },
+  {
+    "id": "paper-ofoldna-005",
+    "question": "OFoldNA-SS 作为独立二级结构预测器的表现如何？与现有方法相比有什么优势？",
+    "expected_points": [
+      "在 CHANRG 基准的分布外（OOD）测试中，OFoldNA-SS 取得最高 OOD 平均 F1 为 0.3898",
+      "比 BPfold（0.3608）相对提高 8.0%，为所有比较方法中最高",
+      "在 GenA 上 F1 为 0.3937，GenC 上为 0.3723，GenF 上为 0.4035",
+      "在分布内 Test 分割上 F1 达 0.4813，比 BPfold（0.4065）相对提高 18.4%",
+      "基础模型预测器（如 RiNALMo-Giga）在分布内表现更高（F1=0.76），但 OOD 泛化差（约 0.21）",
+      "限制序列长度为 50-200 核苷酸后，OFoldNA-SS 的 OOD 平均 F1 达 0.4410，仍保持最高"
+    ],
+    "dataset_id": "0",
+    "pdf_path": "test_data/pdfs/Leveraging secondary‑structure information for accurate nucleic acid structure prediction with OFoldNA.pdf"
+  },
+  {
+    "id": "paper-ofoldna-006",
+    "question": "OFoldNA 的模型架构和训练细节是怎样的？",
+    "expected_points": [
+      "OFoldNA 基于 AlphaFold 3 架构（通过 Protenix 实现），引入 SS embedder 和辅助 SS 预测头",
+      "SS 条件模块使用三态配对矩阵（paired、unpaired、unknown）编码碱基配对信息",
+      "Pairformer trunk 包含 48 层",
+      "训练使用随机掩码策略，将完整配对图或其子集掩码为 unknown，使模型适应不同 SS 可用程度",
+      "训练数据包含 11,758 个 PDB mmCIF 文件（2021 年 9 月 30 日前发布，分辨率 ≤9.0Å）",
+      "使用 Adam 优化器训练 40,000 步，在 16 块 NVIDIA A800 GPU 上约 6 天完成",
+      "推理时使用 10 次循环迭代和 200 步扩散去噪"
+    ],
+    "dataset_id": "0",
+    "pdf_path": "test_data/pdfs/Leveraging secondary‑structure information for accurate nucleic acid structure prediction with OFoldNA.pdf"
+  },
+  {
+    "id": "paper-ofoldna-007",
+    "question": "这篇论文有哪些局限性？作者提出了哪些未来改进方向？",
+    "expected_points": [
+      "涉及较长核酸链的预测仍然具有挑战性，部分原因是训练数据中实验确定的核酸及其复合物结构数量有限",
+      "当前框架未显式建模离子浓度和其他溶液条件对核酸折叠和构象平衡的影响",
+      "OFoldNA-SS2TS 支持不同级别的 SS 可用性，但外部 SS 信息必须以配对图（pairing maps）形式提供",
+      "未来工作可将条件扩展 beyond 碱基配对信息，直接整合来自 SHAPE 或 DMS 探测的核苷酸级反应性谱",
+      "未来可纳入非经典碱基配对（non-canonical base pairing）以获得更精确的二级结构几何"
+    ],
+    "dataset_id": "0",
+    "pdf_path": "test_data/pdfs/Leveraging secondary‑structure information for accurate nucleic acid structure prediction with OFoldNA.pdf"
+  },
+  {
+    "id": "paper-ofoldna-008",
+    "question": "消融实验揭示了哪些模型组件的重要性？分类器自由引导（CFG）有什么效果？",
+    "expected_points": [
+      "移除辅助 SS 损失使平均 lDDT 降低 0.051",
+      "移除 SS Embedder 使平均 lDDT 降低 0.035",
+      "蒸馏训练数据额外提高平均 lDDT 0.022",
+      "部分 SS 信息即可带来持续提升：仅 25% 残基覆盖率时 GDT-TS 从 0.545 提升至 0.596",
+      "CFG（S=3）在 DNA 单体上将 Pair F1 从 0.853 提升至 0.875，Typed F1 从 0.795 提升至 0.823",
+      "CFG 在 RNA 单体上将 Pair F1 从 0.880 提升至 0.912，Typed F1 从 0.864 提升至 0.896",
+      "CFG 同时纠正了遗漏的碱基对和虚假的碱基对"
+    ],
+    "dataset_id": "0",
+    "pdf_path": "test_data/pdfs/Leveraging secondary‑structure information for accurate nucleic acid structure prediction with OFoldNA.pdf"
+  },
+  {
+    "id": "paper-reldb-001",
+    "question": "请总结这篇论文的核心贡献、方法与结论",
+    "expected_points": [
+      "首次系统探索了大语言模型（LLM）在关系数据库预测任务上的应用可行性",
+      "使用 RelBench 基准（包含 7 个关系数据库、共 30 个预测任务）进行实验",
+      "提出将关系数据构建为文本文档（JSON 格式），通过反规范化将关联表信息嵌套到预测样本中",
+      "使用度量感知推理（metric-aware inference）：分类任务用正类 token 概率，回归任务用中位数估计",
+      "实验表明 LLM 结合简单 MLP 头可达到与关系深度学习（RDL）方法相当或更优的性能",
+      "LLM 方法无需端到端训练，在低数据场景下可能有优势"
+    ],
+    "dataset_id": "0",
+    "pdf_path": "test_data/pdfs/Tackling prediction tasks in relational databases with LLMs.pdf"
+  },
+  {
+    "id": "paper-reldb-002",
+    "question": "RelBench 基准包含哪些数据集和任务类型？评估指标是什么？",
+    "expected_points": [
+      "RelBench 包含 7 个关系数据库：rel-amazon、rel-avito、rel-event、rel-f1、rel-hm、rel-stack、rel-trial",
+      "涵盖电商、社交、体育、医疗等不同领域",
+      "共 30 个预测任务",
+      "3 种任务类型：实体级二分类（AUROC 评估）、实体级回归（MAE 评估）、链接预测（MAP 评估）",
+      "数据规模差异大：rel-amazon 有超过 1500 万行，rel-avito 约 2000 万行",
+      "任务表按预测时间划分为训练/验证/测试集，确保时间一致性防止信息泄露"
+    ],
+    "dataset_id": "0",
+    "pdf_path": "test_data/pdfs/Tackling prediction tasks in relational databases with LLMs.pdf"
+  },
+  {
+    "id": "paper-reldb-003",
+    "question": "LLM 方法在分类和回归任务上的具体表现如何？与基线方法相比结果怎样？",
+    "expected_points": [
+      "分类任务：Llama 3.2 3B + MLP 平均 AUROC 达 77.09%，超过 RDL（75.83%）和 LightGBM（76.83%）",
+      "回归任务：Llama 3.2 3B + MLP 平均 MAE 为 13.155，优于 RDL（12.631）但不及 LightGBM 的直接中位数预测",
+      "仅使用度量感知推理（不加 MLP 头）时，LLM 在分类任务上一致超过 LightGBM 但通常低于 RDL",
+      "MLP 头仅使用 1 万到 10 万训练样本训练，而非全部训练数据",
+      "3B 模型总体优于 1B 模型，但性能差距相对较小，说明上下文信息比参数量更重要"
+    ],
+    "dataset_id": "0",
+    "pdf_path": "test_data/pdfs/Tackling prediction tasks in relational databases with LLMs.pdf"
+  },
+  {
+    "id": "paper-reldb-004",
+    "question": "论文中文档构建方法的具体流程是什么？有哪些关键参数？",
+    "expected_points": [
+      "文档由三部分组成：任务上下文（数据库和任务描述）、上下文示例（in-context examples）、待预测实体",
+      "使用 JSON 格式序列化实体及其关联实体，减少 LLM 多跳推理的需求",
+      "关键参数：n_inc（上下文示例数，取 0/8/16）、n_rel（关联示例数，取 0/8/16）、n_nest（嵌套行数，取 0/4/8）、d（遍历深度，取 0/1）",
+      "反规范化过程沿外键到主键方向链接，并从主键到外键方向选取最多 n_nest 条关联行",
+      "递归以广度优先方式展开，跳过已访问的表",
+      "分类任务使用分层采样确保正负样本平衡",
+      "所有任务使用相同的上下文示例集合以加速生成"
+    ],
+    "dataset_id": "0",
+    "pdf_path": "test_data/pdfs/Tackling prediction tasks in relational databases with LLMs.pdf"
+  },
+  {
+    "id": "paper-reldb-005",
+    "question": "论文发现了哪些关于 LLM 在关系数据上应用的重要洞察和特殊情况？",
+    "expected_points": [
+      "Rel-f1（F1 赛车）数据集是例外：LLM 即使零样本（无上下文示例）也能表现良好，因为模型利用了预训练中的 F1 赛事知识",
+      "其他任务中，零样本或仅提供简单上下文示例时 LLM 表现很差，必须提供关联表信息",
+      "不同任务需要包含不同信息：有些任务主要受益于更多关联示例（n_rel），有些需要链接表信息（d 和 n_nest）",
+      "上下文信息比模型参数量更重要：3B 和 1B 模型性能差距较小",
+      "文档 token 数量随参数增加快速增长，部分组合可达数万 token",
+      "实验在 8 块 Nvidia H100 GPU（80GB 显存）上进行，但单块 GPU 即可复现"
+    ],
+    "dataset_id": "0",
+    "pdf_path": "test_data/pdfs/Tackling prediction tasks in relational databases with LLMs.pdf"
+  },
+  {
+    "id": "paper-reldb-006",
+    "question": "请详细说明论文中提到的评估方法和实验结果",
+    "expected_points": [
+      "三种预测任务对应三种评估指标：实体级二分类用 AUROC，实体级回归用 MAE，链接预测用 MAP",
+      "分类任务：Llama 3.2 3B + MLP 平均 AUROC 达 77.09%，超过 RDL（75.83%）和 LightGBM（76.83%）",
+      "回归任务：Llama 3.2 3B + MLP 平均 MAE 为 13.155，不及 LightGBM 的直接中位数预测",
+      "数据集规模差异大（rel-amazon 超 1500 万行，rel-avito 约 2000 万行），跨 7 个数据库 30 个任务验证",
+      "时间一致性设计：预测时只能使用时间戳早于预测时间的信息，防止信息泄露"
+    ],
+    "dataset_id": "0",
+    "pdf_path": "test_data/pdfs/Tackling prediction tasks in relational databases with LLMs.pdf",
+    "note": "INT-002 / E2E-P2 追问用例锚点"
+  },
+  {
+    "id": "paper-reldb-007",
+    "question": "这篇论文有哪些局限性？有哪些可以改进的方向？",
+    "expected_points": [
+      "仅在单一关系基准 RelBench 上验证（虽多样性较强），泛化性有待更多基准验证",
+      "对特定数据库与任务，上下文学习所需的输入窗口可能超出许多主流 LLM 的上下文长度限制",
+      "文档规模随示例数与嵌套深度快速增长，计算成本高",
+      "改进方向：在表格与关系数据上训练模型（类似 Tran et al. 2024 / Li et al. 2024b）可能提升性能",
+      "改进方向：更智能的信息选择（哪些列、哪些链接）而非朴素搜索参数组合，可提升预测性能并降低成本",
+      "扩展方向：随多模态基础模型发展，可延伸到难以文本化的数据类型（如图像、音频）"
+    ],
+    "dataset_id": "0",
+    "pdf_path": "test_data/pdfs/Tackling prediction tasks in relational databases with LLMs.pdf",
+    "note": "E2E-P3 局限性追问锚点（基于论文 Conclusion/Limitations 原文提炼）"
+  },
+  {
+    "id": "paper-ofoldna-009",
+    "question": "请总结这篇新论文的核心内容",
+    "expected_points": [
+      "提出 OFoldNA：统一的全原子扩散模型，用于核酸单链折叠与蛋白质-核酸共折叠",
+      "核心创新：专用 SS embedding 模块将二级结构信息嵌入 pair representation",
+      "在 FoldBench 基准上核酸单链折叠与蛋白质-核酸共折叠均取得领先性能（如 DNA 单体 TM-score 0.329，比 AlphaFold 3 高约 35%）",
+      "辅助分支 OFoldNA-SS 作为独立二级结构预测器取得最佳分布外泛化",
+      "提供精确碱基配对信息时（OFoldNA-SS2TS）可进一步提升精度"
+    ],
+    "dataset_id": "0",
+    "pdf_path": "test_data/pdfs/Leveraging secondary‑structure information for accurate nucleic acid structure prediction with OFoldNA.pdf",
+    "note": "E2E-P4 / INT-003 换新文件后总结锚点（与 001 同型问题）"
+  },
+  {
+    "id": "paper-ofoldna-010",
+    "question": "这篇论文中二级结构信息在核酸结构预测中起什么作用？",
+    "expected_points": [
+      "SS embedding 模块将碱基配对信息（三态配对矩阵：paired/unpaired/unknown）编码进 pair representation，作为模型的条件输入",
+      "提供 SS 信息后折叠精度显著提升：DNA 的 TM-score 提升 19.6%，lDDT 提升 8.0%，INF-all 提升 10.1%",
+      "部分 SS 信息即可带来持续提升：仅 25% 残基覆盖率时 GDT-TS 从 0.545 提升至 0.596",
+      "训练时用随机掩码策略使模型适应不同 SS 可用程度",
+      "消融实验：移除辅助 SS 损失使平均 lDDT 降低 0.051，移除 SS Embedder 降低 0.035"
+    ],
+    "dataset_id": "0",
+    "pdf_path": "test_data/pdfs/Leveraging secondary‑structure information for accurate nucleic acid structure prediction with OFoldNA.pdf",
+    "note": "E2E-P5 纯文字追问锚点"
+  },
+  {
+    "id": "paper-ofoldna-011",
+    "question": "请详细说明这篇论文中二级结构信息对核酸结构预测精度的影响",
+    "expected_points": [
+      "SS 条件模块以三态配对矩阵（paired/unpaired/unknown）编码碱基配对信息嵌入 pair representation",
+      "提供 SS 后（OFoldNA-SS2TS）DNA 的 TM-score 提升 19.6%，lDDT 提升 8.0%，INF-all 提升 10.1%",
+      "部分覆盖即有效：25% 残基覆盖率时 GDT-TS 从 0.545 提升至 0.596",
+      "消融实验：移除辅助 SS 损失使平均 lDDT 降低 0.051，移除 SS Embedder 降低 0.035；蒸馏训练数据额外提高 0.022",
+      "CFG（S=3）在 DNA 单体上将 Pair F1 从 0.853 提升至 0.875，同时纠正遗漏与虚假碱基对",
+      "局限性：外部 SS 信息必须以配对图（pairing maps）形式提供"
+    ],
+    "dataset_id": "0",
+    "pdf_path": "test_data/pdfs/Leveraging secondary‑structure information for accurate nucleic acid structure prediction with OFoldNA.pdf",
+    "note": "INT-003 追问换文件用例锚点（与 010 同主题、措辞不同，供不同用例命中）"
+  },
+  {
+    "id": "paper-reldb-008",
+    "question": "请总结这篇论文的核心贡献",
+    "expected_points": [
+      "首次系统探索了大语言模型（LLM）在关系数据库预测任务上的应用可行性",
+      "提出将关系数据构建为文本文档（JSON 格式反规范化嵌套），使 LLM 无需额外微调即可处理关系数据预测",
+      "使用 RelBench 基准（7 个关系数据库、30 个预测任务）验证",
+      "LLM 结合简单 MLP 头可达到与关系深度学习（RDL）方法相当或更优的性能"
+    ],
+    "dataset_id": "0",
+    "pdf_path": "test_data/pdfs/Tackling prediction tasks in relational databases with LLMs.pdf",
+    "note": "INT-003 q1 首次提问锚点（换文件场景 q1，与 001 同型但措辞不同）"
+  },
+  {
+    "id": "paper-ooc-001",
+    "question": "这篇论文是否报告了在医学影像数据集上的实验？请给出具体的实验数据集名称、样本量和准确率数值。",
+    "expected_points": [
+      "【拒答口径】明确表示论文未报告在医学影像数据集上的实验（如：未提及/没有报告）",
+      "【拒答口径】不给出具体医学影像数据集名称（如 CheXpert、ImageNet 等）及样本量、准确率数值",
+      "【拒答口径】如提及论文中的医学领域数据集，应澄清其为关系型数据库/临床试验数据而非医学影像数据"
+    ],
+    "dataset_id": "0",
+    "pdf_path": "test_data/pdfs/Tackling prediction tasks in relational databases with LLMs.pdf",
+    "note": "INT-005 OOC 拒答用例锚点（expected_points 为拒答行为口径而非内容要点，Judge instruction_follow 按此核对）"
+  }
+]

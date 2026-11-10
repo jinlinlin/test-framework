@@ -72,6 +72,10 @@ coverage.xml
 # ---------- pytest 缓存 ----------
 .pytest_cache/
 
+# ---------- 用例栈运行产物 ----------
+test_output/
+.deepeval/
+
 # ---------- Docker ----------
 docker/.env
 

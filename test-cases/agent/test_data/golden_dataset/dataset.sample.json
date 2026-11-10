@@ -1,0 +1,25 @@
+{
+  "_note": "示例数据，需替换为真实数据：本文件仅为格式样例，不直接用于评测；正式评测集请新建 JSON 数组文件（元素结构同 items 内元素，不含本说明字段），字段说明见本目录 README.md",
+  "items": [
+    {
+      "id": "sample-rag-001",
+      "question": "请概括该知识库中文献的主要研究结论",
+      "expected_points": [
+        "要点1：替换为期望回答必须覆盖的真实要点",
+        "要点2：替换为期望回答必须覆盖的真实要点"
+      ],
+      "dataset_id": "请替换为真实知识库ID",
+      "pdf_path": ""
+    },
+    {
+      "id": "sample-paper-001",
+      "question": "本文献采用了什么研究方法？",
+      "expected_points": [
+        "指出研究方法名称",
+        "说明实验对象或数据来源"
+      ],
+      "dataset_id": "0",
+      "pdf_path": "test_data/pdfs/请替换为真实PDF文件名.pdf"
+    }
+  ]
+}
