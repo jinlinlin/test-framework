@@ -164,6 +164,15 @@ class Config:
         return self.get("JUDGE_MODEL")
 
     @property
+    def deepeval_model(self) -> Optional[str]:
+        """DeepEval 内置指标的评估模型名称（可选，未配置时回退 JUDGE_MODEL）。
+
+        评估模型需严格 JSON 输出服从性，与自建 Judge 的模型可分开选型；
+        Judge 基线由 JUDGE_MODEL 承载，本配置只影响第三方指标的打分模型。
+        """
+        return self.get("DEEPEVAL_MODEL")
+
+    @property
     def judge_temperature(self) -> Optional[float]:
         """Judge 采样温度：未配置默认 0.1；显式留空或配 none/off 返回 None（请求不传该参数）。
 

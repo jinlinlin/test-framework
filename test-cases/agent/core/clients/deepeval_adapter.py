@@ -73,11 +73,13 @@ class DeepEvalAdapter:
         Args:
             base_url: 模型服务地址（默认复用 JUDGE_BASE_URL）
             api_key: API Key（默认复用 JUDGE_API_KEY）
-            model: 模型名称（默认复用 JUDGE_MODEL）
+            model: 模型名称（优先 DEEPEVAL_MODEL，未配置时回退 JUDGE_MODEL）
         """
         self.base_url = base_url or config.judge_base_url or ""
         self.api_key = api_key or config.judge_api_key or ""
-        self.model = model or config.judge_model or ""
+        # 评估模型与 Judge 模型分离：第三方指标需严格 JSON 服从性，
+        # 选型不受 Judge 历史基线约束；DEEPEVAL_MODEL 未配置时保持旧行为
+        self.model = model or config.deepeval_model or config.judge_model or ""
 
         # 检查必填配置
         if not self.base_url or not self.api_key or not self.model:
@@ -85,7 +87,7 @@ class DeepEvalAdapter:
                 "DeepEval 需要模型配置。请在 config/.env 中填写：\n"
                 "JUDGE_BASE_URL=https://dashscope.aliyuncs.com/compatible-mode/v1\n"
                 "JUDGE_API_KEY=sk-你的密钥\n"
-                "JUDGE_MODEL=qwen-plus"
+                "DEEPEVAL_MODEL=严格JSON输出服从性好的模型（可选，未配置时回退 JUDGE_MODEL）"
             )
 
         # 导入 DeepEval（延迟导入，避免未安装时导入报错）
