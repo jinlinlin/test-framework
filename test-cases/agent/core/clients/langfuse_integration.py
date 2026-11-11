@@ -796,6 +796,7 @@ class LangfuseReporter:
         text: str,
         ai_response: str = "",
         document_text: str = "",
+        judge_content: str = "",
         timing: Optional[Dict[str, float]] = None,
         input_info: Optional[Dict[str, Any]] = None,
         file_metadata: Optional[Dict[str, Any]] = None,
@@ -969,10 +970,14 @@ class LangfuseReporter:
                 if _dim in judge_result
             ]
             _summary = _all_runs[0].get("summary", "") if _all_runs else ""
+            # 被评内容与裁判实际输入对齐（judge_content 为【AI回答】+【生成文档】
+            # 拼接体）；旧版只展示 ai_response 使读者误判评分范围仅限 AI 回答
+            # （2026-11-11）；未透传时退回旧行为保证兼容。
+            _eval_target = judge_content or (ai_response or "")
             try:
                 trace.event(
                     name=self._n("Judge 评分"),
-                    input={"被评估内容": ai_response[:10000] + "..." if ai_response and len(ai_response) > 10000 else (ai_response or "无")},
+                    input={"被评估内容": _eval_target[:10000] + "..." if len(_eval_target) > 10000 else (_eval_target or "无")},
                     output={
                         "评分详情": judge_details_ordered,
                         "裁判评语": _summary[:5000] if _summary else "无",

@@ -240,6 +240,11 @@ def _save_full_artifacts(
     if document_text:
         (case_dir / f"{ts}_document.md").write_text(document_text, encoding="utf-8")
 
+    # 3c. 裁判实际被评内容：用与用例主体相同的纯函数重建（同 text + 同
+    # document_text 产出逐字一致），供 Langfuse「Judge 评分」展示与评分
+    # 对象对齐；q2 等编辑重建场景由调用方传入的 document_text 保证同源。
+    judge_content, _judge_content_src = _build_judge_content(text or "", document_text or "")
+
     # 4. 工具调用详情
     if tool_calls:
         tool_data = {
@@ -354,6 +359,7 @@ def _save_full_artifacts(
                     case_name=case_name, case_dir=case_dir, ts=ts,
                     chunks=chunks, text=text,
                     ai_response=ai_response, document_text=document_text,
+                    judge_content=judge_content,
                     timing=timing, input_info=input_info,
                     file_metadata=file_metadata,
                     tool_calls=tool_calls, judge_result=judge_result,

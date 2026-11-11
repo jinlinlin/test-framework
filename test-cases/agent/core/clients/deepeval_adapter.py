@@ -338,7 +338,13 @@ class DeepEvalAdapter:
                     return None
 
     def _translate_reasons(self, reasons: Dict[str, str]) -> Dict[str, str]:
-        """将 DeepEval 英文评分理由翻译为中文，并扩充为详细分析。
+        """将 DeepEval 英文评分理由翻译为中文（忠实翻译，不扩充）。
+
+        历史缺陷（2026-11-11 取证定性）：旧 prompt 要求“扩充为详细分析并
+        引用具体例证”，但扩充模型只拿到理由文本、**未见过被评内容**，
+        只能凭空编造不存在的引证（如“本文为分……节”“请按以下步骤处理”，
+        在评分对象全文零命中）；分数本身由 DeepEval 基于真实内容计算不受影响，
+        仅理由文字被污染。故改为只做忠实翻译，显式禁止添加原理由中没有的信息。
 
         Args:
             reasons: 英文理由字典 {维度名: 英文理由}
@@ -366,23 +372,22 @@ class DeepEvalAdapter:
             translated = {}
             for dim, reason in reasons.items():
                 dim_cn = dimension_names.get(dim, dim)
-                prompt = f"""请将以下 AI 评估理由从英文翻译为中文，并扩充为详细分析（包含具体例证）。
+                prompt = f"""请将以下 AI 评估理由从英文翻译为中文。
 
 维度：{dim_cn}
 原始理由：{reason}
 
 要求：
-1. 准确翻译原意
-2. 扩充为 2-3 句话，包含具体的评分依据
-3. 引用文档中的具体内容作为例证
-4. 使用专业、客观的评估语言
+1. 忠实翻译，不改变原文的术语与事实判断
+2. 不得添加原始理由中不存在的内容，不得编造引证或例证
+3. 使用专业、客观的评估语言
 
-请直接输出中文理由，不要添加额外说明。"""
+请直接输出中文译文，不要添加额外说明。"""
 
                 response = client.chat.completions.create(
                     model=config.judge_model,
                     messages=[
-                        {"role": "system", "content": "你是专业的 AI 评估分析师，擅长将评估理由翻译为中文并提供详细分析。"},
+                        {"role": "system", "content": "你是专业译者，只负责将 AI 评估理由从英文忠实翻译为中文，不添加任何原文没有的信息。"},
                         {"role": "user", "content": prompt},
                     ],
                     temperature=0.3,
