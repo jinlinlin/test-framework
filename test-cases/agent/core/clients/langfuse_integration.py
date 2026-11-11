@@ -8,9 +8,20 @@
 - Event（事件）：产物文件引用
 
 未配置 LANGFUSE_PUBLIC_KEY / LANGFUSE_SECRET_KEY 时静默禁用，不影响测试运行。
+
+SDK 版本说明：本模块面向 langfuse SDK 4.x（无 2.x 的 client.trace()/trace.span() 入口），
+环境需装 langfuse>=4,<5（本仓暂无 agent 依赖清单文件，升级/重装环境时以本行为准）。
+上报统一走 ingestion batch 通道而非 4.x 高层 start_observation：后者经 OTLP 导出，
+要求 langfuse-server v3，而本项目自托管镜像是 langfuse/langfuse:2（无 OTel 端点，
+observation 会 404 静默丢）；ingestion 的 trace/span/generation/event/score 五类事件
+是 server v2 起就稳定的公开协议（4.15.6 SDK 内部的 score/trace 事件同样用它，源码实证）。
+版本差异全部收敛在 _Trace2xHandle 兼容层内，上层方法（add_*_span / report_trace /
+conftest 五钩子）保持 2.x 时代的方法面不变；装回 2.x 会命中 AttributeError 降级分支并留痕。
 """
 import os  # 检测空值环境变量对 dotenv 加载的阻断
 import re  # 黄金集版本号提取（dataset 标签）
+import uuid  # ingestion 事件 id（trace-create 必填）
+from datetime import datetime, timezone  # ingestion 事件时间戳（UTC ISO8601）
 from pathlib import Path
 from typing import Any, Dict, List, Optional
 
@@ -162,6 +173,112 @@ def build_faithfulness_reason(judge_result: Dict[str, Any]) -> str:
     return "；".join(parts)
 
 
+def _utc_now_iso() -> str:
+    """UTC ISO8601 时间戳（ingestion 协议要求的格式，实测钉 4.15.6）。"""
+    return datetime.now(timezone.utc).strftime("%Y-%m-%dT%H:%M:%S.%fZ")
+
+
+def _make_ingestion_event(ev_type: str, body: Dict[str, Any]) -> Dict[str, Any]:
+    """构造一条 ingestion 事件（顶层 id/timestamp/type/body）。
+
+    用普通 dict 而非 pydantic 类：SDK 4.15.6 内部（create_score 的 add_score_task、
+    trace 事件）就是同样形状直送 batch，协议由服务端而非 SDK 类定义保证稳定；
+    强类型类（CreateSpanEvent 等）序列化后反而缺 type 鉴别字段（实测钉）。
+    body 键用 camelCase（服务端公开 API 约定）。
+    """
+    return {
+        "id": uuid.uuid4().hex,
+        "timestamp": _utc_now_iso(),
+        "type": ev_type,
+        "body": {k: v for k, v in body.items() if v is not None},
+    }
+
+
+class _Trace2xHandle:
+    """4.x SDK 的 2.x 语义兼容层：保留 StatefulTraceClient 的五个方法面。
+
+    上层 add_* 方法全部只操作这个句柄（span/event/generation/score/update），
+    把版本差异收敛在这里意味着：截断策略、重试 ·#N 序号、黄金锚点回查等
+    业务逻辑一行不动，conftest 五钩子与 test_paper_common 也零改动。
+
+    通道选择（均经 4.15.6 + langfuse-server:2 实测/源码双重钉）：
+    - 五类写入全部走 api.ingestion.batch（同步 HTTP，事件形状见 _make_ingestion_event）；
+      不用高层 start_observation——它经 OTLP 导出，server v2 无该端点会静默丢节点。
+    - trace_id 凭 client.create_trace_id() 生成，节点用 body.traceId 关联同一 trace，
+      与 2.x「trace 只是事件容器」语义等价。
+    - update(input/output) 本地累积后整体重发 trace-create（服务端 upsert，
+      把 name/tags 一并重发防覆盖丢字段）；trace 级 tags 只有这条通道能写。
+    - 时间戳：节点创建即 start=end=当前时刻（与 2.x 一次性事件语义一致；
+      真正的耗时在 metadata 的 first_chunk_ms/total_ms 里，UI 不靠 span 时长）。
+    """
+
+    def __init__(self, client: Any, trace_id: str, body: Dict[str, Any]) -> None:
+        self._client = client
+        self._trace_id = trace_id
+        # trace 级累积体：update() 时整体重发，防止覆盖语义丢 name/tags/metadata
+        self._body = dict(body)
+
+    def _send(self, ev_type: str, body: Dict[str, Any]) -> None:
+        self._client.api.ingestion.batch(batch=[_make_ingestion_event(ev_type, body)])
+
+    def _observation(self, ev_type: str, name: str, input: Any, output: Any,
+                     metadata: Optional[Dict[str, Any]], **extra: Any) -> None:
+        now = _utc_now_iso()
+        body: Dict[str, Any] = {
+            "id": uuid.uuid4().hex,
+            "traceId": self._trace_id,
+            "name": name,
+            "startTime": now,
+            "input": input,
+            "output": output,
+            "metadata": metadata,
+        }
+        if ev_type != "event-create":  # event 是瞬时点，无 endTime 字段（实测钉）
+            body["endTime"] = now
+        body.update({k: v for k, v in extra.items() if v is not None})
+        self._send(ev_type, body)
+
+    def span(self, name: str, input: Any = None, output: Any = None,
+             metadata: Optional[Dict[str, Any]] = None, **kwargs: Any) -> None:
+        """挂一个 span 节点（SSE 调用 / 工具调用 / Token 用量 / Judge 降级）。"""
+        self._observation("span-create", name, input, output, metadata)
+
+    def event(self, name: str, input: Any = None, output: Any = None,
+              metadata: Optional[Dict[str, Any]] = None, **kwargs: Any) -> None:
+        """挂一个 event 节点（产物引用 / 测试输入 / Judge 评分 / 失败与重试事件）。"""
+        self._observation("event-create", name, input, output, metadata)
+
+    def generation(self, name: str, model: str = "", input: Any = None,
+                   output: Any = None, usage: Optional[Dict[str, Any]] = None,
+                   metadata: Optional[Dict[str, Any]] = None, **kwargs: Any) -> None:
+        """挂一个 generation 节点（LLM 调用观测）。
+
+        usage 直接透传 2.x 载荷形状 {input, output, total, unit}：server v2 时代
+        就认这套字段（旧字段名兼容新字段 usage_details，实测钉），无需映射。
+        """
+        self._observation("generation-create", name, input, output, metadata,
+                          model=model or None,
+                          usage=usage if isinstance(usage, dict) else None)
+
+    def score(self, name: str, value: float, **kwargs: Any) -> None:
+        """trace 级打分行（八维评分、judge_average、test_passed 等）。"""
+        self._send("score-create", {
+            "id": uuid.uuid4().hex,
+            "traceId": self._trace_id,
+            "name": name,
+            "value": float(value),
+            "dataType": "NUMERIC",
+        })
+
+    def update(self, input: Any = None, output: Any = None, **kwargs: Any) -> None:
+        """trace 级 input/output 增量更新（2.x 同名方法语义）。"""
+        if input is not None:
+            self._body["input"] = input
+        if output is not None:
+            self._body["output"] = output
+        self._send("trace-create", self._body)
+
+
 class LangfuseReporter:
     """Langfuse 报告器：管理 pytest session 的 Trace 上报。
 
@@ -188,10 +305,13 @@ class LangfuseReporter:
             host = config.get("LANGFUSE_HOST") or "http://localhost:3000"
             if public_key and secret_key:
                 from langfuse import Langfuse
+                # timeout=10：4.15.6 构造无 max_retries 参数，但连接拒接会秒败，
+                # 真正要防的是 host 黑洞化（TCP 挂起）拖住用例；首败后仍有 session 级熔断兜底
                 self._client = Langfuse(
                     public_key=public_key,
                     secret_key=secret_key,
                     host=host,
+                    timeout=10,
                 )
                 self._enabled = True
                 try:
@@ -200,7 +320,7 @@ class LangfuseReporter:
                 except Exception:  # pragma: no cover - 仅用于打印诊断信息
                     _ver = "unknown"
                 # 打印 SDK 版本与实际入口，用于快速判定"上报没生效"是不是 API 名对不上
-                print(f"[Langfuse] 已启用：{host}（SDK {_ver}，入口 client.trace()）")
+                print(f"[Langfuse] 已启用：{host}（SDK {_ver}，ingestion 统一通道，经 _Trace2xHandle 兼容层）")
             else:
                 # dotenv 的规则是"已存在的环境变量优先、不覆盖"（含空值）——
                 # IDE 运行配置若注入过空的 LANGFUSE_* 变量，会静默阻断 .env 里的 Key。
@@ -262,28 +382,39 @@ class LangfuseReporter:
             input: 输入内容（如用户提问）。
 
         Returns:
-            Langfuse Trace 对象；未启用时返回 None。
+            2.x 语义的 Trace 句柄（_Trace2xHandle）；未启用时返回 None。
         """
         if not self._enabled:
             return None
         try:
-            # 实测钉：langfuse SDK 2.60.10 的 Trace 创建入口是 client.trace()，
-            # client.start_trace() 不存在（那是 v3/v4 的命名）。本文件曾误写为
-            # start_trace()，被下面
-            # 的 AttributeError 分支静默吞掉，表现为"Langfuse 里什么都看不到但用例全绿"。
-            return self._client.trace(
-                name=name,
-                input=input,
-                metadata=metadata or {},
-                tags=tags or [],
-            )
+            # 实测钉 4.15.6 + server:2：trace 级 name/tags/metadata 与观测节点统一走
+            # ingestion batch；trace_id 凭 create_trace_id 生成，节点用 body.traceId 关联。
+            # 本函数同步发一次 HTTP：容器未起时 fern 客户端会重试+退避（实测一次
+            # 失败可达分钟级），故失败即熔断本 session（见下方 except），不得逐条重试。
+            client = self._client
+            trace_id = client.create_trace_id()
+            body: Dict[str, Any] = {
+                "id": trace_id,
+                "name": name,
+                "metadata": metadata or {},
+                "tags": tags or [],
+            }
+            if input is not None:
+                body["input"] = input
+            client.api.ingestion.batch(batch=[_make_ingestion_event("trace-create", body)])
+            return _Trace2xHandle(client, trace_id, body)
         except AttributeError as e:
-            # SDK 版本与入口方法名不匹配：禁用必须留痕，否则整条上报链路会无声自我关闭
+            # SDK 版本与入口方法名不匹配（如装回 2.x 无 create_trace_id）：
+            # 禁用必须留痕，否则整条上报链路会无声自我关闭
             self._enabled = False
-            print(f"[Langfuse] 当前 SDK 无 trace() 入口，Trace 上报已禁用（不影响测试）：{e}")
+            print(f"[Langfuse] 当前 SDK 无 4.x 入口（create_trace_id/api.ingestion），Trace 上报已禁用（不影响测试）：{e}")
             return None
         except Exception as e:
-            print(f"[Langfuse] 创建 Trace 失败：{e}")
+            # 服务不可达/事件被拒：一次即熔断本 session。逐条重试是实测过的坑——
+            # 容器未起时 fern 客户端默认重试+退避，165 条离线用例被拖到十分钟级
+            # （2026-11-11 适配批实测）。禁用必须留痕，与 AttributeError 分支同一原则。
+            self._enabled = False
+            print(f"[Langfuse] 创建 Trace 失败，本次 session 上报已停止（不影响测试，后续用例不再尝试）：{e}")
             return None
 
     def add_sse_span(
