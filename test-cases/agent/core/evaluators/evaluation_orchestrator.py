@@ -104,15 +104,16 @@ class EvaluationOrchestrator:
 
         # judge 主观调用只做一次，deepeval 缺维补全与 judge 路由维共用同一份
         judge_scores: Dict[str, Any] = {}
+        judge_raw: Dict[str, Any] = {}
         if self._judge is not None:
             try:
-                judge_scores = _extract_scores(
-                    self._judge.evaluate(question, answer, expected_points)
-                )
+                judge_raw = self._judge.evaluate(question, answer, expected_points) or {}
+                judge_scores = _extract_scores(judge_raw)
             except Exception as e:  # judge 失败不立即抛出，deepeval 可能兜住
                 print(f"[orchestrator] Judge 主观评估失败：{e}")
 
         deepeval_scores: Dict[str, Any] = {}
+        deepeval_reasons: Dict[str, Any] = {}
         deepeval_failed = False
         if self._use_deepeval:
             try:
@@ -124,6 +125,13 @@ class EvaluationOrchestrator:
                     deepeval_failed = True
                 else:
                     deepeval_scores = _extract_scores(raw)
+                    # 理由两种形态都要收：真实 adapter 最终形态放下划线键
+                    # "_reasons"，_run_evaluation 中间层包装形态放 "reasons"，
+                    # 只认其一会导致混合模式评语半截失效（2026-11-11）
+                    if isinstance(raw, dict):
+                        _r = raw.get("reasons") or raw.get("_reasons")
+                        if isinstance(_r, dict):
+                            deepeval_reasons = dict(_r)
             except Exception as e:
                 deepeval_failed = True
                 print(f"[orchestrator] DeepEval 评估异常：{e}")
@@ -159,4 +167,25 @@ class EvaluationOrchestrator:
         merged["_evaluation_backend"] = backend_map
         if deepeval_failed:
             merged["_deepeval_fallback"] = "deepeval 整体失败，已回退全 Judge"
+        # 评语与元信息透传：消费方（report_trace / build_optimized_scores）按
+        # 纯 Judge 路径的 _all_runs 形态读 details/summary，此前 _extract_scores
+        # 只收数值，混合模式下评语与裁判 token 开销全部静默丢失（2026-11-11）。
+        # 评语按分数来源对齐：Judge 打的分用 Judge 的评语，DeepEval 打的分用
+        # adapter（已中文化）的评语，防止评语与被覆盖的分数错位。
+        details: List[Dict[str, str]] = []
+        for d in (judge_raw.get("details") or []):
+            if isinstance(d, dict) and backend_map.get(d.get("dimension")) == "judge":
+                details.append({"dimension": d["dimension"], "reason": d.get("reason", "")})
+        for dim, reason in deepeval_reasons.items():
+            if backend_map.get(dim) == "deepeval" and reason:
+                details.append({"dimension": dim, "reason": str(reason)})
+        if details or judge_raw.get("summary"):
+            merged["_all_runs"] = [
+                {"details": details, "summary": str(judge_raw.get("summary", ""))}
+            ]
+        if judge_raw.get("_judge_usage"):
+            merged["_judge_usage"] = judge_raw["_judge_usage"]
+        _judge_model = getattr(self._judge, "model", "") if self._judge is not None else ""
+        if _judge_model:
+            merged["_judge_model"] = str(_judge_model)
         return merged

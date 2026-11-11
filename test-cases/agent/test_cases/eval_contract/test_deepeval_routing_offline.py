@@ -172,3 +172,89 @@ class TestScoreSinkIntegration:
         dims = json.loads(props["dimensions"])
         assert "average" not in dims  # 元数据键不混入 dimensions
         assert not any(k.startswith("_") for k in dims)  # 后端映射不入维度 JSON
+
+
+class TestReasonPassthrough:
+    """评语透传契约：混合模式下 _all_runs/details 不丢，且按分数来源对齐。
+
+    背景：Langfuse「Judge 评分」节点与 judge.json 落盘的理由均读
+    _all_runs[0].details；编排器曾只合并分数导致六个主观维理由恒为空串。
+    """
+
+    def test_hybrid_reasons_aligned_with_score_source(self):
+        # Judge 对 relevance 写了评语，但该维分数被 DeepEval 覆盖——
+        # 评语必须改用 adapter 的，防止分数与解释来自不同裁判
+        judge = RecordingJudge(scores={
+            **JUDGE_SUBJECTIVE,
+            "details": [
+                {"dimension": "relevance", "reason": "Judge 的相关性评语"},
+                {"dimension": "depth", "reason": "Judge 的深度评语"},
+            ],
+            "summary": "整体评价",
+        })
+        deepeval = FakeDeepEval(scores={
+            "scores": {"relevance": DEEPEVAL_MARK, "faithfulness": DEEPEVAL_MARK},
+            "reasons": {"relevance": "DeepEval 的相关性评语"},
+        })
+        result = EvaluationOrchestrator(
+            judge_client=judge, deepeval_adapter=deepeval, use_deepeval=True
+        ).evaluate("q", "a")
+        assert result["_evaluation_backend"]["relevance"] == "deepeval"  # 前提：分数已覆盖
+        reason_map = {d["dimension"]: d["reason"] for d in result["_all_runs"][0]["details"]}
+        assert reason_map["relevance"] == "DeepEval 的相关性评语"  # 随分数来源切换
+        assert reason_map["depth"] == "Judge 的深度评语"  # judge 路由维用 judge 评语
+        assert result["_all_runs"][0]["summary"] == "整体评价"
+
+    def test_reasons_from_real_adapter_flat_shape(self):
+        # 真实 adapter 最终形态：扁平分数 dict + 理由放下划线键 "_reasons"；
+        # 只认包装形态 "reasons" 会使 deepeval 维评语真实链路半截丢失
+        judge = RecordingJudge(scores={
+            **JUDGE_SUBJECTIVE,
+            "details": [{"dimension": "relevance", "reason": "Judge 评语（分数已被覆盖，不应采用）"}],
+        })
+        deepeval = FakeDeepEval(scores={
+            "relevance": DEEPEVAL_MARK, "faithfulness": DEEPEVAL_MARK,
+            "_reasons": {"relevance": "DeepEval 的相关性评语", "faithfulness": "DeepEval 的忠实度评语"},
+        })
+        result = EvaluationOrchestrator(
+            judge_client=judge, deepeval_adapter=deepeval, use_deepeval=True
+        ).evaluate("q", "a")
+        reason_map = {d["dimension"]: d["reason"] for d in result["_all_runs"][0]["details"]}
+        assert reason_map["relevance"] == "DeepEval 的相关性评语"
+        assert reason_map["faithfulness"] == "DeepEval 的忠实度评语"
+
+    def test_pure_judge_details_kept(self):
+        # 纯 Judge 路径（USE_DEEPEVAL 关）同样要带出 details/summary
+        judge = RecordingJudge(scores={
+            **JUDGE_SUBJECTIVE,
+            "details": [{"dimension": "depth", "reason": "Judge 的深度评语"}],
+            "summary": "整体评价",
+        })
+        result = EvaluationOrchestrator(
+            judge_client=judge, use_deepeval=False
+        ).evaluate("q", "a")
+        details = result["_all_runs"][0]["details"]
+        assert {d["dimension"]: d["reason"] for d in details}["depth"] == "Judge 的深度评语"
+
+    def test_no_details_no_fake_all_runs(self):
+        # 后端未产出评语时不伪造 _all_runs（消费方保持现有降级行为）
+        judge, deepeval = RecordingJudge(), FakeDeepEval()
+        result = EvaluationOrchestrator(
+            judge_client=judge, deepeval_adapter=deepeval, use_deepeval=True
+        ).evaluate("q", "a")
+        assert "_all_runs" not in result
+
+    def test_all_runs_not_leaking_into_sink(self, score_sink, request):
+        # _all_runs 是下划线元数据键，不得混入 junit dimensions 属性
+        judge = RecordingJudge(scores={
+            **JUDGE_SUBJECTIVE,
+            "details": [{"dimension": "depth", "reason": "x"}],
+            "summary": "s",
+        })
+        result = EvaluationOrchestrator(
+            judge_client=judge, use_deepeval=False
+        ).evaluate("q", "a")
+        assert "_all_runs" in result  # 评语已带出
+        score_sink(result)
+        dims = json.loads(dict(request.node.user_properties)["dimensions"])
+        assert not any(k.startswith("_") for k in dims)
